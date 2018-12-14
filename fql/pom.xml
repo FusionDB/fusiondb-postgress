@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>fusiondb</artifactId>
+        <groupId>cn.fusiondb</groupId>
+        <version>0.1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>fusiondb-fql</artifactId>
+    <packaging>jar</packaging>
+    <name>Fusiondb Project Fql</name>
+    <url>http://fusiondb.cn/</url>
+
+    <properties>
+        <sbt.project.name>fql</sbt.project.name>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-runtime</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!--
+                 This plugin forces the generation of jar containing fql test classes,
+                 so that the tests classes of external modules can use them. The two execution profiles
+                 are necessary - first one for 'mvn package', second one for 'mvn test-compile'. Ideally,
+                 'mvn compile' should not compile test classes and therefore should not need this.
+                 However, a closed due to "Cannot Reproduce" Maven bug (https://issues.apache.org/jira/browse/MNG-3559)
+                 causes the compilation to fail if catalyst test-jar is not generated. Hence, the
+                 second execution profile for 'mvn test-compile'.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>prepare-test-jar</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>antlr4</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <visitor>true</visitor>
+                    <sourceDirectory>src/main/resources</sourceDirectory>
+                    <outputDirectory>src/main/java/cn/fusiondb/dsl/parser</outputDirectory>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

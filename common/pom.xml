@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>fusiondb</artifactId>
+        <groupId>cn.fusiondb</groupId>
+        <version>0.1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>fusiondb-common</artifactId>
+
+    <properties>
+        <sbt.project.name>common</sbt.project.name>
+    </properties>
+
+    <packaging>jar</packaging>
+    <name>Fusiondb Project Common</name>
+    <url>http://fusiondb.cn/</url>
+
+    <dependencies>
+
+    </dependencies>
+
+    <build>
+    </build>
+
+    <profiles>
+    </profiles>
+
+</project>
