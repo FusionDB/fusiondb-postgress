@@ -1,4 +1,5 @@
-// Generated from SqlBase.g4 by ANTLR 4.7
+// Generated from cn/fusiondb/dsl/parser/SqlBase.g4 by ANTLR 4.7
+package cn.fusiondb.dsl.parser;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
@@ -610,6 +611,30 @@ public class SqlBaseBaseListener implements SqlBaseListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitLoadData(SqlBaseParser.LoadDataContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterLoadDataExtends(SqlBaseParser.LoadDataExtendsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitLoadDataExtends(SqlBaseParser.LoadDataExtendsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterSaveData(SqlBaseParser.SaveDataContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitSaveData(SqlBaseParser.SaveDataContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

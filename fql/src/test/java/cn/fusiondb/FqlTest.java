@@ -14,11 +14,11 @@ public class FqlTest {
 
     @Test
     public void testVisitor() {
-        ANTLRInputStream input = new ANTLRInputStream("load csv.`test/a.txt` as a;");
-        FQLLexer lexer = new FQLLexer(input);
+        ANTLRInputStream input = new ANTLRInputStream("LOAD 'HDFS'.'/usr/test' FORMAT 'CSV' OPTIONS('header'='true') AS T WHERE A=1 AND B=1 AND C=1;");
+        SqlBaseLexer lexer = new SqlBaseLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
-        FQLParser parser = new FQLParser(tokens);
-        ParseTree tree = parser.sql(); // fql is the starting rule
+        SqlBaseParser parser = new SqlBaseParser(tokens);
+        ParseTree tree = parser.statement(); // fql is the starting rule
 
         for (int i=0; i< tree.getChildCount(); i++) {
             System.out.println(tree.getChild(i).getText());
@@ -29,13 +29,13 @@ public class FqlTest {
         System.out.println();
 
         System.out.println("Visitor:");
-        FQLVisitor evalByVisitor = new FQLBaseVisitor();
+        SqlBaseVisitor evalByVisitor = new SqlBaseBaseVisitor();
         evalByVisitor.visit(tree);
         System.out.println();
 
         System.out.println("Listener:");
         ParseTreeWalker walker = new ParseTreeWalker();
-        FQLListener evalByListener = new FQLBaseListener();
+        SqlBaseListener evalByListener = new SqlBaseBaseListener();
         walker.walk(evalByListener, tree);
     }
 

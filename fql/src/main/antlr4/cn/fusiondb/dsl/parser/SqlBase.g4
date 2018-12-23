@@ -168,6 +168,14 @@ statement
     | CLEAR CACHE                                                      #clearCache
     | LOAD DATA LOCAL? INPATH path=STRING OVERWRITE? INTO TABLE
         tableIdentifier partitionSpec?                                 #loadData
+    | LOAD dataSource=STRING ('.' path=STRING)? (FORMAT type=STRING)?
+        (OPTIONS options=tablePropertyList)? AS tableIdentifier
+        (WHERE where=booleanExpression)?                               #loadDataExtends
+    | SAVE (APPEND | OVERWRITE | IGNORE | IF EXISTS)?
+        tableName=tableIdentifier TO targetSource=STRING ('.' path=STRING)?
+        (FORMAT type=STRING)?
+        (OPTIONS options=tablePropertyList)?
+        (PARTITION BY identifier)?                                     #saveData
     | TRUNCATE TABLE tableIdentifier partitionSpec?                    #truncateTable
     | MSCK REPAIR TABLE tableIdentifier                                #repairTable
     | op=(ADD | LIST) identifier .*?                                   #manageResource
@@ -777,6 +785,7 @@ nonReserved
     | DATABASE | SELECT | FROM | WHERE | HAVING | TO | TABLE | WITH | NOT
     | DIRECTORY
     | BOTH | LEADING | TRAILING
+    | SAVE | APPEND
     ;
 
 SELECT: 'SELECT';
@@ -895,6 +904,8 @@ IGNORE: 'IGNORE';
 BOTH: 'BOTH';
 LEADING: 'LEADING';
 TRAILING: 'TRAILING';
+SAVE: 'SAVE';
+APPEND: 'APPEND';
 
 IF: 'IF';
 POSITION: 'POSITION';

@@ -1,4 +1,5 @@
-// Generated from SqlBase.g4 by ANTLR 4.7
+// Generated from cn/fusiondb/dsl/parser/SqlBase.g4 by ANTLR 4.7
+package cn.fusiondb.dsl.parser;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 /**
@@ -353,6 +354,20 @@ public interface SqlBaseVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitLoadData(SqlBaseParser.LoadDataContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code loadDataExtends}
+	 * labeled alternative in {@link SqlBaseParser#statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitLoadDataExtends(SqlBaseParser.LoadDataExtendsContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code saveData}
+	 * labeled alternative in {@link SqlBaseParser#statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSaveData(SqlBaseParser.SaveDataContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code truncateTable}
 	 * labeled alternative in {@link SqlBaseParser#statement}.

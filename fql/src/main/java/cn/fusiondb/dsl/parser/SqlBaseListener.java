@@ -1,4 +1,5 @@
-// Generated from SqlBase.g4 by ANTLR 4.7
+// Generated from cn/fusiondb/dsl/parser/SqlBase.g4 by ANTLR 4.7
+package cn.fusiondb.dsl.parser;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
 /**
@@ -594,6 +595,30 @@ public interface SqlBaseListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitLoadData(SqlBaseParser.LoadDataContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code loadDataExtends}
+	 * labeled alternative in {@link SqlBaseParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterLoadDataExtends(SqlBaseParser.LoadDataExtendsContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code loadDataExtends}
+	 * labeled alternative in {@link SqlBaseParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitLoadDataExtends(SqlBaseParser.LoadDataExtendsContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code saveData}
+	 * labeled alternative in {@link SqlBaseParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterSaveData(SqlBaseParser.SaveDataContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code saveData}
+	 * labeled alternative in {@link SqlBaseParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitSaveData(SqlBaseParser.SaveDataContext ctx);
 	/**
 	 * Enter a parse tree produced by the {@code truncateTable}
 	 * labeled alternative in {@link SqlBaseParser#statement}.

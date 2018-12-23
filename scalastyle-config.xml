@@ -15,16 +15,21 @@
   ~ limitations under the License.
   -->
 <!--
+
 If you wish to turn off checking for a section of code, you can put a comment in the source
 before and after the section, with the following syntax:
+
   // scalastyle:off
   ...  // stuff that breaks the styles
   // scalastyle:on
+
 You can also disable only one rule, by specifying its rule id, as specified in:
   http://www.scalastyle.org/rules-0.7.0.html
+
   // scalastyle:off no.finalize
   override def finalize(): Unit = ...
   // scalastyle:on no.finalize
+
 This file is divided into 3 sections:
  (1) rules that we enforce.
  (2) rules that we would like to enforce, but haven't cleaned up the codebase to turn on yet
@@ -130,12 +135,6 @@ This file is divided into 3 sections:
     <!-- ??? usually shouldn't be checked into the code base. -->
     <check level="error" class="org.scalastyle.scalariform.NotImplementedErrorUsage" enabled="true"></check>
 
-    <!-- As of SPARK-7558, all tests in Spark should extend o.a.s.SparkFunSuite instead of FunSuite directly -->
-    <check customId="funsuite" level="error" class="org.scalastyle.scalariform.TokenChecker" enabled="true">
-        <parameters><parameter name="regex">^FunSuite[A-Za-z]*$</parameter></parameters>
-        <customMessage>Tests must extend org.apache.spark.SparkFunSuite instead.</customMessage>
-    </check>
-
     <!-- As of SPARK-7977 all printlns need to be wrapped in '// scalastyle:off/on println' -->
     <check customId="println" level="error" class="org.scalastyle.scalariform.TokenChecker" enabled="true">
         <parameters><parameter name="regex">^println$</parameter></parameters>
@@ -143,19 +142,6 @@ This file is divided into 3 sections:
       // scalastyle:off println
       println(...)
       // scalastyle:on println]]></customMessage>
-    </check>
-
-    <check customId="hadoopconfiguration" level="error" class="org.scalastyle.file.RegexChecker" enabled="true">
-        <parameters><parameter name="regex">spark(.sqlContext)?.sparkContext.hadoopConfiguration</parameter></parameters>
-        <customMessage><![CDATA[
-      Are you sure that you want to use sparkContext.hadoopConfiguration? In most cases, you should use
-      spark.sessionState.newHadoopConf() instead, so that the hadoop configurations specified in Spark session
-      configuration will come into effect.
-      If you must use sparkContext.hadoopConfiguration, wrap the code block with
-      // scalastyle:off hadoopconfiguration
-      spark.sparkContext.hadoopConfiguration...
-      // scalastyle:on hadoopconfiguration
-    ]]></customMessage>
     </check>
 
     <check customId="visiblefortesting" level="error" class="org.scalastyle.file.RegexChecker" enabled="true">
@@ -267,11 +253,11 @@ This file is divided into 3 sections:
 
     <check level="error" class="org.scalastyle.scalariform.ImportOrderChecker" enabled="true">
         <parameters>
-            <parameter name="groups">java,scala,3rdParty,spark</parameter>
+            <parameter name="groups">java,scala,3rdParty,fusiondb</parameter>
             <parameter name="group.java">javax?\..*</parameter>
             <parameter name="group.scala">scala\..*</parameter>
-            <parameter name="group.3rdParty">(?!org\.apache\.spark\.).*</parameter>
-            <parameter name="group.spark">org\.apache\.spark\..*</parameter>
+            <parameter name="group.3rdParty">(?!org\.apache\.).*</parameter>
+            <parameter name="group.fusiondb">cn\.fusiondb\..*</parameter>
         </parameters>
     </check>
 
@@ -279,14 +265,6 @@ This file is divided into 3 sections:
         <parameters>
             <parameter name="tokens">COMMA</parameter>
         </parameters>
-    </check>
-
-    <!-- SPARK-3854: Single Space between ')' and '{' -->
-    <check customId="SingleSpaceBetweenRParenAndLCurlyBrace" level="error" class="org.scalastyle.file.RegexChecker" enabled="true">
-        <parameters><parameter name="regex">\)\{</parameter></parameters>
-        <customMessage><![CDATA[
-      Single Space between ')' and `{`.
-    ]]></customMessage>
     </check>
 
     <check customId="NoScalaDoc" level="error" class="org.scalastyle.file.RegexChecker" enabled="true">
