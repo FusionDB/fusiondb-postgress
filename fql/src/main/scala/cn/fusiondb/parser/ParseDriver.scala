@@ -1,54 +1,41 @@
-package cn.fusiondb.dsl.parser
+package cn.fusiondb.parser
 
+import cn.fusiondb.dsl.parser._
+import cn.fusiondb.internal.Logging
 import org.antlr.v4.runtime._
 import org.antlr.v4.runtime.atn.PredictionMode
 import org.antlr.v4.runtime.misc.{Interval, ParseCancellationException}
 import org.antlr.v4.runtime.tree.TerminalNodeImpl
-import org.apache.spark.internal.Logging
-import org.apache.spark.sql.AnalysisException
-import org.apache.spark.sql.catalyst.parser.{ParserInterface, ParserUtils}
-import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
-import org.apache.spark.sql.catalyst.trees.Origin
-import org.apache.spark.sql.internal.SQLConf
 
 /**
   * Base SQL parsing infrastructure.
   */
-abstract class AbstractSqlParser extends ParserInterface with Logging {
+abstract class AbstractSqlParser extends Logging{
 
-  /** Creates LogicalPlan for a given SQL string. */
-  override def parsePlan(sqlText: String): LogicalPlan = parse(sqlText) { parser =>
-    astBuilder.visitSingleStatement(parser.singleStatement()) match {
-      case plan: LogicalPlan => plan
-      case _ =>
-        val position = Origin(None, None)
-        throw new ParseException(Option(sqlText), "Unsupported SQL statement", position, position)
-    }
-  }
-
-  /** Get the builder (visitor) which converts a ParseTree into an AST. */
   protected def astBuilder: AstBuilder
 
-  protected def parse[T](command: String)(toResult: SqlBaseParser => T): T = {
-    logDebug(s"Parsing command: $command")
+  // TODO: Creates LogicalPlan for a given SQL string.
+
+  def parse(command: String) {
+    //logDebug(s"Parsing command: $command")
 
     val lexer = new SqlBaseLexer(new UpperCaseCharStream(CharStreams.fromString(command)))
     lexer.removeErrorListeners()
     lexer.addErrorListener(ParseErrorListener)
-    lexer.legacy_setops_precedence_enbled = SQLConf.get.setOpsPrecedenceEnforced
+    lexer.legacy_setops_precedence_enbled = true
 
     val tokenStream = new CommonTokenStream(lexer)
     val parser = new SqlBaseParser(tokenStream)
     parser.addParseListener(PostProcessor)
     parser.removeErrorListeners()
     parser.addErrorListener(ParseErrorListener)
-    parser.legacy_setops_precedence_enbled = SQLConf.get.setOpsPrecedenceEnforced
+    parser.legacy_setops_precedence_enbled = true
 
     try {
       try {
         // first, try parsing with potentially faster SLL mode
         parser.getInterpreter.setPredictionMode(PredictionMode.SLL)
-        toResult(parser)
+        astBuilder.visitSingleStatement(parser.singleStatement())
       }
       catch {
         case e: ParseCancellationException =>
@@ -58,17 +45,14 @@ abstract class AbstractSqlParser extends ParserInterface with Logging {
 
           // Try Again.
           parser.getInterpreter.setPredictionMode(PredictionMode.LL)
-          toResult(parser)
       }
     }
     catch {
-      case e: ParseException if e.command.isDefined =>
-        throw e
       case e: ParseException =>
+        logError(s"Unsupported SQL statement, " + e.getMessage)
         throw e.withCommand(command)
-      case e: AnalysisException =>
-        val position = Origin(e.line, e.startPosition)
-        throw new ParseException(Option(command), e.message, position, position)
+      case e: Exception =>
+        throw new ParseException(command, e)
     }
   }
 }
@@ -133,51 +117,17 @@ case object ParseErrorListener extends BaseErrorListener {
                             charPositionInLine: Int,
                             msg: String,
                             e: RecognitionException): Unit = {
-    val position = Origin(Some(line), Some(charPositionInLine))
-    throw new ParseException(None, msg, position, position)
+    throw new ParseException(msg, e)
   }
 }
 
 /**
-  * A [[ParseException]] is an [[AnalysisException]] that is thrown during the parse process. It
+  * A [[ParseException]] is an [[Exception]] that is thrown during the parse process. It
   * contains fields and an extended error message that make reporting and diagnosing errors easier.
   */
-class ParseException(
-                      val command: Option[String],
-                      message: String,
-                      val start: Origin,
-                      val stop: Origin) extends AnalysisException(message, start.line, start.startPosition) {
-
-  def this(message: String, ctx: ParserRuleContext) = {
-    this(Option(ParserUtils.command(ctx)),
-      message,
-      ParserUtils.position(ctx.getStart),
-      ParserUtils.position(ctx.getStop))
-  }
-
-  override def getMessage: String = {
-    val builder = new StringBuilder
-    builder ++= "\n" ++= message
-    start match {
-      case Origin(Some(l), Some(p)) =>
-        builder ++= s"(line $l, pos $p)\n"
-        command.foreach { cmd =>
-          val (above, below) = cmd.split("\n").splitAt(l)
-          builder ++= "\n== SQL ==\n"
-          above.foreach(builder ++= _ += '\n')
-          builder ++= (0 until p).map(_ => "-").mkString("") ++= "^^^\n"
-          below.foreach(builder ++= _ += '\n')
-        }
-      case _ =>
-        command.foreach { cmd =>
-          builder ++= "\n== SQL ==\n" ++= cmd
-        }
-    }
-    builder.toString
-  }
-
+class ParseException(command: String, e: Exception) extends Exception(command, e) {
   def withCommand(cmd: String): ParseException = {
-    new ParseException(Option(cmd), message, start, stop)
+    new ParseException(cmd, e)
   }
 }
 

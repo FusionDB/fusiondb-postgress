@@ -253,10 +253,9 @@ This file is divided into 3 sections:
 
     <check level="error" class="org.scalastyle.scalariform.ImportOrderChecker" enabled="true">
         <parameters>
-            <parameter name="groups">java,scala,3rdParty,fusiondb</parameter>
+            <parameter name="groups">java,scala,fusiondb</parameter>
             <parameter name="group.java">javax?\..*</parameter>
             <parameter name="group.scala">scala\..*</parameter>
-            <parameter name="group.3rdParty">(?!org\.apache\.).*</parameter>
             <parameter name="group.fusiondb">cn\.fusiondb\..*</parameter>
         </parameters>
     </check>
