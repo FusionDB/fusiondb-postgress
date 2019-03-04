@@ -92,8 +92,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
+            <groupId>cn.fusiondb</groupId>
+            <artifactId>fusiondb-common</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
@@ -117,7 +118,6 @@
                 <configuration>
                     <visitor>true</visitor>
                     <sourceDirectory>src/main/antlr4</sourceDirectory>
-                    <outputDirectory>src/main/java</outputDirectory>
                 </configuration>
             </plugin>
         </plugins>
