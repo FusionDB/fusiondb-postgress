@@ -13,7 +13,7 @@
 
     <artifactId>fusiondb-fql</artifactId>
     <packaging>jar</packaging>
-    <name>Fusiondb Project Fql</name>
+    <name>Fusiondb Project SQL</name>
     <url>http://fusiondb.cn/</url>
 
     <properties>
