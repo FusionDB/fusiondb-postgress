@@ -15,26 +15,10 @@
 
 package cn.fusiondb.fql.execution.command
 
-import org.apache.spark.sql.{Row, SparkSession}
-
-/**
-  *
-  * Create by xujiang on 2018/12/29
-  *
+/*
+  * A logical command that is executed for its side-effects.  `RunnableCommand`s are
+  * wrapped in `ExecutedCommand` during execution.
   */
-trait RunnableCommand extends commands {
-
-  override def output = super.output
-
-  def run(sparkSession: SparkSession): Seq[Row]
-}
-
-/**
-  *
-  * @param cmd
-  */
-case class ExecutedCommandExec(cmd: RunnableCommand) {
-
-  def output: Seq[AnyRef] = cmd.output
-
+trait RunnableCommand{
+  def run(cmd: String): Unit
 }

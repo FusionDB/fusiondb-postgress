@@ -32,7 +32,7 @@ abstract class AbstractSqlParser extends Logging {
   // TODO: Creates LogicalPlan for a given SQL string.
 
   def parse(command: String) {
-    //logDebug(s"Parsing command: $command")
+    logDebug(s"Parsing command: $command")
 
     val lexer = new SqlBaseLexer(new UpperCaseCharStream(CharStreams.fromString(command)))
     lexer.removeErrorListeners()
