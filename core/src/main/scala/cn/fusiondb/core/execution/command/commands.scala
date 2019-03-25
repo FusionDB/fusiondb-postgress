@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 
-package cn.fusiondb.fql.execution.command
+package cn.fusiondb.core.execution.command
+
+import org.apache.spark.sql.SparkSession
 
 /*
   * A logical command that is executed for its side-effects.  `RunnableCommand`s are
   * wrapped in `ExecutedCommand` during execution.
   */
 trait RunnableCommand{
-  def run(cmd: String): Unit
+  def run(sparkSession: SparkSession): Any
 }

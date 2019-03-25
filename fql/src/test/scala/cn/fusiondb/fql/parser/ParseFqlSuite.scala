@@ -15,8 +15,8 @@
 
 package cn.fusiondb.fql.parser
 
-import cn.fusiondb.fql.internal.SQLConf
 import org.apache.spark.sql.hive.test.TestHive
+import org.apache.spark.sql.internal.SQLConf
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
 class ParseFqlSuite extends FunSuite with BeforeAndAfterAll {
@@ -27,14 +27,14 @@ class ParseFqlSuite extends FunSuite with BeforeAndAfterAll {
     super.beforeAll()
   }
 
-  def assertValidSQLString(mySql: String, sparkSql: String): Unit = {
-    parser.parse(sparkSql)
+  def assertValidSQLString(sparkSql: String, pgSql: String): Unit = {
+    parser.parsePlan(sparkSql)
   }
 
   test("~") {
     assertValidSQLString(
-      "SELECT * FROM testData WHERE value ~ 'abc'",
-      "SELECT * FROM testData WHERE value RLIKE 'abc'"
+      "SELECT * FROM testData WHERE value RLIKE 'abc'",
+      "SELECT * FROM testData WHERE value ~ 'abc'"
     )
   }
 

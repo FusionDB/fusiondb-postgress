@@ -15,12 +15,34 @@
 
 package cn.fusiondb.fql.parser
 
-import cn.fusiondb.fql.internal.SQLConf
+import cn.fusiondb.dsl.parser.SqlBaseParser
+import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
+import org.apache.spark.sql.execution.command.ResetCommand
+import org.apache.spark.sql.fdb.parser.{AbstractSqlParser, AstBuilder}
+import org.apache.spark.sql.internal.{SQLConf, VariableSubstitution}
 
+class FqlParse(conf: SQLConf) extends AbstractSqlParser {
+  val astBuilder = new FqlAstBuilder(conf)
 
-class FqlParse(conf: SQLConf)  extends AbstractSqlParser {
+  private val substitutor = new VariableSubstitution(conf)
 
-  val astBuilder = new AstBuilder(conf)
+  protected override def parse[T](command: String)(toResult: SqlBaseParser => T): T = {
+    val cmd = substitutor.substitute(command)
+    super.parse(cmd)(toResult)
+  }
+}
 
-  // sql parser
+/**
+  * Builder that converts an ANTLR ParseTree into a LogicalPlan/Expression/TableIdentifier.
+  */
+class FqlAstBuilder(conf: SQLConf) extends AstBuilder(conf) {
+  import org.apache.spark.sql.catalyst.parser.ParserUtils._
+
+  override def visitLoadDataExtends(ctx: SqlBaseParser.LoadDataExtendsContext): LogicalPlan = withOrigin(ctx) {
+    ResetCommand
+  }
+
+  override def visitSaveData(ctx: SqlBaseParser.SaveDataContext): LogicalPlan = withOrigin(ctx) {
+    ResetCommand
+  }
 }

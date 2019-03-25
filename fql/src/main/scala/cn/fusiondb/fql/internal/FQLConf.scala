@@ -13,29 +13,10 @@
  * limitations under the License.
  */
 
-package cn.fusiondb.fql.datasource.csv
+package cn.fusiondb.fql.internal
 
 import cn.fusiondb.common.internal.Logging
-/*
-  * CSV Data Source
- */
-abstract class CSVDataSource extends Serializable{
-  def readFile(input: String, option: Map[String, String]): Unit
-  def writeFile(outut: String, option: Map[String, String]): Unit
-}
 
-object CSVDataSource extends Logging{
-  def apply(): String = {
-      "abc~test"
-  }
-}
+class FQLConf extends Serializable with Logging {
 
-object OptionsCSVDataSource extends CSVDataSource{
-  override def readFile(input: String, option: Map[String, String]): Unit = {
-    
-  }
-
-  override def writeFile(outut: String, option: Map[String, String]): Unit = {
-
-  }
 }

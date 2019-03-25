@@ -162,8 +162,7 @@ statement
         tableIdentifier partitionSpec? describeColName?                #describeTable
     | REFRESH TABLE tableIdentifier                                    #refreshTable
     | REFRESH (STRING | .*?)                                           #refreshResource
-    | CACHE LAZY? TABLE tableIdentifier
-        (OPTIONS options=tablePropertyList)? (AS? query)?              #cacheTable
+    | CACHE LAZY? TABLE tableIdentifier (AS? query)?                   #cacheTable
     | UNCACHE TABLE (IF EXISTS)? tableIdentifier                       #uncacheTable
     | CLEAR CACHE                                                      #clearCache
     | LOAD DATA LOCAL? INPATH path=STRING OVERWRITE? INTO TABLE
@@ -477,7 +476,7 @@ joinType
 
 joinCriteria
     : ON booleanExpression
-    | USING identifierList
+    | USING '(' identifier (',' identifier)* ')'
     ;
 
 sample
