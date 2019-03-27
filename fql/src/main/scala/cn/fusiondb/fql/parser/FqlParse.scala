@@ -15,6 +15,7 @@
 
 package cn.fusiondb.fql.parser
 
+import cn.fusiondb.core.execution.command.LoadDataCommand
 import cn.fusiondb.dsl.parser.SqlBaseParser
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 import org.apache.spark.sql.execution.command.ResetCommand
@@ -39,10 +40,17 @@ class FqlAstBuilder(conf: SQLConf) extends AstBuilder(conf) {
   import org.apache.spark.sql.catalyst.parser.ParserUtils._
 
   override def visitLoadDataExtends(ctx: SqlBaseParser.LoadDataExtendsContext): LogicalPlan = withOrigin(ctx) {
+    val options = Option(ctx.options)
+    LoadDataCommand(
+      dataSource = ctx.dataSource.getText,
+      formatType = ctx.`type`.getText,
+      path = ctx.path.getText,
+      tableName = visitTableIdentifier(ctx.tableIdentifier()),
+      Map("a" -> "b"))
     ResetCommand
   }
 
-  override def visitSaveData(ctx: SqlBaseParser.SaveDataContext): LogicalPlan = withOrigin(ctx) {
+  override def visitSaveData(ctx: SqlBaseParser.SaveDataContext) : LogicalPlan = withOrigin(ctx) {
     ResetCommand
   }
 }

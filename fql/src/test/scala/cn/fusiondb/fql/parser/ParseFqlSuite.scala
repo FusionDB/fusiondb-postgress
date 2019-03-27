@@ -40,7 +40,7 @@ class ParseFqlSuite extends FunSuite with BeforeAndAfterAll {
 
   test("load") {
     assertValidSQLString(
-      "LOAD 'HDFS'.'/usr/test' FORMAT 'CSV' OPTIONS('header'='true') AS T WHERE A=1",
+      "LOAD 'HDFS'.'/usr/test' FORMAT 'CSV' OPTIONS('header'='true') AS T",
       "SAVE T1 TO 'LOCAL'.'/usr/a' FORMAT 'PARQUET' PARTITION BY COL2"
     )
   }
