@@ -169,8 +169,7 @@ statement
         tableIdentifier partitionSpec?                                 #loadData
     | LOAD dataSource=STRING ('.' path=STRING)? (FORMAT type=STRING)?
         (OPTIONS options=tablePropertyList)? AS tableIdentifier        #loadDataExtends
-    | SAVE (APPEND | OVERWRITE | IGNORE | IF EXISTS)?
-        tableName=tableIdentifier TO targetSource=STRING ('.' path=STRING)?
+    | SAVE saveMode? tableName=tableIdentifier TO targetSource=STRING ('.' path=STRING)?
         (FORMAT type=STRING)?
         (OPTIONS options=tablePropertyList)?
         (PARTITION BY identifier)?                                     #saveData
@@ -229,6 +228,10 @@ unsupportedHiveNativeCommands
     | kw1=ROLLBACK
     | kw1=DFS
     | kw1=DELETE kw2=FROM
+    ;
+
+saveMode
+    : APPEND | OVERWRITE | IGNORE | ErrorIfExists
     ;
 
 createTableHeader

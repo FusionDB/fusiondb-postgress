@@ -15,15 +15,17 @@
 
 package cn.fusiondb.fql.parser
 
-import cn.fusiondb.core.execution.command.LoadDataCommand
+import cn.fusiondb.core.execution.command.{LoadDataCommand, SaveDataCommand}
 import cn.fusiondb.dsl.parser.SqlBaseParser
+import cn.fusiondb.dsl.parser.SqlBaseParser.TablePropertyListContext
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 import org.apache.spark.sql.execution.command.ResetCommand
 import org.apache.spark.sql.fdb.parser.{AbstractSqlParser, AstBuilder}
 import org.apache.spark.sql.internal.{SQLConf, VariableSubstitution}
 
-class FqlParse(conf: SQLConf) extends AbstractSqlParser {
-  val astBuilder = new FqlAstBuilder(conf)
+class FqlParse(conf: SQLConf, sparkSession: SparkSession) extends AbstractSqlParser {
+  val astBuilder = new FqlAstBuilder(conf, sparkSession)
 
   private val substitutor = new VariableSubstitution(conf)
 
@@ -36,21 +38,41 @@ class FqlParse(conf: SQLConf) extends AbstractSqlParser {
 /**
   * Builder that converts an ANTLR ParseTree into a LogicalPlan/Expression/TableIdentifier.
   */
-class FqlAstBuilder(conf: SQLConf) extends AstBuilder(conf) {
+class FqlAstBuilder(conf: SQLConf, sparkSession: SparkSession) extends AstBuilder(conf) {
   import org.apache.spark.sql.catalyst.parser.ParserUtils._
 
   override def visitLoadDataExtends(ctx: SqlBaseParser.LoadDataExtendsContext): LogicalPlan = withOrigin(ctx) {
-    val options = Option(ctx.options)
+    val options = Option(ctx.options).map(visitPropertyKeyValues).getOrElse(Map.empty)
     LoadDataCommand(
-      dataSource = ctx.dataSource.getText,
-      formatType = ctx.`type`.getText,
-      path = ctx.path.getText,
+      dataSource = ctx.dataSource.getText.toLowerCase.replace("'",""),
+      formatType = ctx.`type`.getText.toLowerCase.replace("'",""),
+      path = ctx.path.getText.replace("'",""),
       tableName = visitTableIdentifier(ctx.tableIdentifier()),
-      Map("a" -> "b"))
+      options).run(sparkSession)
     ResetCommand
   }
 
   override def visitSaveData(ctx: SqlBaseParser.SaveDataContext) : LogicalPlan = withOrigin(ctx) {
+    val options = Option(ctx.options).map(visitPropertyKeyValues).getOrElse(Map.empty)
+    SaveDataCommand(
+      formatType = ctx.`type`.getText.toLowerCase.replace("'",""),
+      path = ctx.path.getText.toLowerCase.replace("'",""),
+      viewTable = visitTableIdentifier(ctx.tableName),
+      targetSource = ctx.targetSource.getText.toLowerCase.replace("'",""),
+      options).run(sparkSession)
     ResetCommand
   }
+
+  /**
+    * Parse a key-value map from a [[TablePropertyListContext]], assuming all values are specified.
+    */
+  private def visitPropertyKeyValues(ctx: TablePropertyListContext): Map[String, String] = {
+    val props = ctx.tableProperty()
+    var map: Map[String, String] = Map()
+    for (i <- 0 to props.size()-1) {
+      map += (props.get(i).key.start.getText -> props.get(i).value.getStart.getText)
+    }
+    map
+  }
+
 }

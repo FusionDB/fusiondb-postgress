@@ -18,12 +18,6 @@ package cn.fusiondb.core.execution.command
 import org.apache.spark.sql.catalyst.TableIdentifier
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
-case class ReigsterTableCommand(dataFrame: DataFrame, tableName: String) extends RunnableCommand {
-  override def run(sparkSession: SparkSession): Unit = {
-    dataFrame.createTempView(tableName)
-  }
-}
-
 case class LoadDataCommand(
      dataSource: String,
      formatType: String,
@@ -42,19 +36,19 @@ case class LoadDataCommand(
 }
 
 case class SaveDataCommand(
-                            dataSource: String,
                             formatType: String,
                             path: String,
                             viewTable: TableIdentifier,
-                            tableName: TableIdentifier,
-                            options: Map[String, String]) extends RunnableCommand {
+                            targetSource: String,
+                            options: Map[String, String],
+                            mode: String = "ErrorIfExists") extends RunnableCommand {
   override def run(sparkSession: SparkSession): Unit = {
     if (path != null) {
-      val vTable = sparkSession.sql("select * from "+viewTable.table)
-      vTable.write.format(formatType).options(options).save(path)
+      val vt = sparkSession.sql("select * from "+viewTable.table)
+      vt.write.format(formatType).options(options).mode(mode).save(path)
     } else {
-      val vTable = sparkSession.sql("select * from "+viewTable.table)
-      vTable.write.format(formatType).options(options).save()
+      val vt = sparkSession.sql("select * from "+viewTable.table)
+      vt.write.format(formatType).options(options).mode(mode).save()
     }
   }
 }
@@ -65,8 +59,8 @@ case class SelectTableCommand(cmd: String) extends RunnableCommand {
   }
 }
 
-case class InsertTableCommand() extends RunnableCommand {
+case class InsertTableCommand(cmd: String) extends RunnableCommand {
   override def run(sparkSession: SparkSession): Unit = {
-
+    sparkSession.sql(cmd)
   }
 }

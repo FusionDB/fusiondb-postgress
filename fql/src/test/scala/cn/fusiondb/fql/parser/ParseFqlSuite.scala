@@ -15,12 +15,16 @@
 
 package cn.fusiondb.fql.parser
 
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.hive.test.TestHive
 import org.apache.spark.sql.internal.SQLConf
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
 class ParseFqlSuite extends FunSuite with BeforeAndAfterAll {
-  lazy val parser = new FqlParse(new SQLConf())
+
+  val spark = SparkSession.builder.master("local").appName("ParseFql").getOrCreate()
+
+  lazy val parser = new FqlParse(new SQLConf(), spark)
   lazy val sqlContext = TestHive
 
   override protected def beforeAll() : Unit = {
@@ -29,19 +33,24 @@ class ParseFqlSuite extends FunSuite with BeforeAndAfterAll {
 
   def assertValidSQLString(sparkSql: String, pgSql: String): Unit = {
     parser.parsePlan(sparkSql)
+    parser.parsePlan(pgSql)
   }
 
   test("~") {
     assertValidSQLString(
       "SELECT * FROM testData WHERE value RLIKE 'abc'",
-      "SELECT * FROM testData WHERE value ~ 'abc'"
+      "SELECT * FROM testData WHERE value=10",
     )
   }
 
-  test("load") {
+  test("load & save file") {
     assertValidSQLString(
-      "LOAD 'HDFS'.'/usr/test' FORMAT 'CSV' OPTIONS('header'='true') AS T",
-      "SAVE T1 TO 'LOCAL'.'/usr/a' FORMAT 'PARQUET' PARTITION BY COL2"
+      "LOAD 'LOCAL'.'/data/github/fusiondb/data/csv' FORMAT 'CSV' OPTIONS(inferSchema=true, header=true) AS T1",
+      "SAVE T1 TO 'LOCAL'.'/data/github/fusiondb/data/csv/t1' FORMAT 'PARQUET'"
     )
+  }
+
+  override protected def afterAll(): Unit = {
+    spark.close()
   }
 }
