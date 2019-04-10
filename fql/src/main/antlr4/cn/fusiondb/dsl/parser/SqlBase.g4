@@ -167,10 +167,10 @@ statement
     | CLEAR CACHE                                                      #clearCache
     | LOAD DATA LOCAL? INPATH path=STRING OVERWRITE? INTO TABLE
         tableIdentifier partitionSpec?                                 #loadData
-    | LOAD dataSource=STRING ('.' path=STRING)? (FORMAT type=STRING)?
+    | LOAD (path=STRING | sourceType=identifier) (FORMAT type=identifier)?
         (OPTIONS options=tablePropertyList)? AS tableIdentifier        #loadDataExtends
-    | SAVE saveMode? tableName=tableIdentifier TO targetSource=STRING ('.' path=STRING)?
-        (FORMAT type=STRING)?
+    | SAVE saveMode=identifier? tableName=tableIdentifier TO (path=STRING | sourceType=identifier)
+        (FORMAT type=identifier)?
         (OPTIONS options=tablePropertyList)?
         (PARTITION BY identifier)?                                     #saveData
     | TRUNCATE TABLE tableIdentifier partitionSpec?                    #truncateTable
@@ -228,10 +228,6 @@ unsupportedHiveNativeCommands
     | kw1=ROLLBACK
     | kw1=DFS
     | kw1=DELETE kw2=FROM
-    ;
-
-saveMode
-    : APPEND | OVERWRITE | IGNORE | ErrorIfExists
     ;
 
 createTableHeader
@@ -786,7 +782,7 @@ nonReserved
     | DATABASE | SELECT | FROM | WHERE | HAVING | TO | TABLE | WITH | NOT
     | DIRECTORY
     | BOTH | LEADING | TRAILING
-    | SAVE | APPEND
+    | SAVE
     ;
 
 SELECT: 'SELECT';
@@ -906,7 +902,6 @@ BOTH: 'BOTH';
 LEADING: 'LEADING';
 TRAILING: 'TRAILING';
 SAVE: 'SAVE';
-APPEND: 'APPEND';
 
 IF: 'IF';
 POSITION: 'POSITION';

@@ -18,27 +18,27 @@ package cn.fusiondb.fql.parser
 import cn.fusiondb.core.execution.command.{LoadDataCommand, SaveDataCommand}
 import cn.fusiondb.dsl.parser.SqlBaseParser
 import cn.fusiondb.dsl.parser.SqlBaseParser.TablePropertyListContext
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.catalyst.expressions.PredicateHelper
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 import org.apache.spark.sql.execution.command.ResetCommand
-import org.apache.spark.sql.fdb.parser.{AbstractSqlParser, AstBuilder}
-import org.apache.spark.sql.internal.{SQLConf, VariableSubstitution}
+import org.apache.spark.sql.fdb.execution.{SparkSqlAstBuilder, SparkSqlParser}
+import org.apache.spark.sql.internal.SQLConf
 
-class FqlParse(conf: SQLConf, sparkSession: SparkSession) extends AbstractSqlParser {
-  val astBuilder = new FqlAstBuilder(conf, sparkSession)
-
-  private val substitutor = new VariableSubstitution(conf)
-
-  protected override def parse[T](command: String)(toResult: SqlBaseParser => T): T = {
-    val cmd = substitutor.substitute(command)
-    super.parse(cmd)(toResult)
-  }
+/**
+  * Concrete parser for PostgreSQL statements.
+  *
+  * TODO: We just copy Spark parser files into `org.apache.spark.sql.server.parser.*` and build
+  * a new parser for PostgreSQL. So, we should fix this in a pluggable way.
+  */
+private[fql] class PgParse(conf: SQLConf) extends SparkSqlParser(conf) {
+  override val astBuilder = new PgAstBuilder(conf)
 }
 
 /**
   * Builder that converts an ANTLR ParseTree into a LogicalPlan/Expression/TableIdentifier.
   */
-class FqlAstBuilder(conf: SQLConf, sparkSession: SparkSession) extends AstBuilder(conf) {
+private[fql] class PgAstBuilder(conf: SQLConf) extends SparkSqlAstBuilder(conf)
+  with PredicateHelper {
   import org.apache.spark.sql.catalyst.parser.ParserUtils._
 
   override def visitLoadDataExtends(ctx: SqlBaseParser.LoadDataExtendsContext): LogicalPlan = withOrigin(ctx) {
@@ -48,7 +48,7 @@ class FqlAstBuilder(conf: SQLConf, sparkSession: SparkSession) extends AstBuilde
       formatType = Option(ctx.`type`).map(st => st.getText.toLowerCase).getOrElse(""),
       path = Option(ctx.path).map(st => st.getText.toLowerCase).getOrElse("").replace("'",""),
       tableName = visitTableIdentifier(ctx.tableIdentifier()),
-      options).run(sparkSession)
+      options)
     ResetCommand
   }
 
@@ -61,7 +61,7 @@ class FqlAstBuilder(conf: SQLConf, sparkSession: SparkSession) extends AstBuilde
       formatType = Option(ctx.`type`).map(st => st.getText.toLowerCase).getOrElse(""),
       path = Option(ctx.path).map(st => st.getText.toLowerCase).getOrElse("").replace("'",""),
       viewTable = visitTableIdentifier(ctx.tableName),
-      options).run(sparkSession)
+      options)
     ResetCommand
   }
 
@@ -76,5 +76,4 @@ class FqlAstBuilder(conf: SQLConf, sparkSession: SparkSession) extends AstBuilde
     }
     map
   }
-
 }

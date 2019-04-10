@@ -45,8 +45,8 @@ class ParseFqlSuite extends FunSuite with BeforeAndAfterAll {
 
   test("load & save file") {
     assertValidSQLString(
-      "LOAD 'LOCAL'.'/data/github/fusiondb/data/csv' FORMAT 'CSV' OPTIONS(inferSchema=true, header=true) AS T1",
-      "SAVE T1 TO 'LOCAL'.'/data/github/fusiondb/data/csv/t1' FORMAT 'PARQUET'"
+      "load 'file:///data/github/fusiondb/data/csv' format csv options('inferSchema'='true', 'header'='true') as t1",
+      "SAVE append T1 TO 'file:///data/github/fusiondb/data/csv/t1' FORMAT PARQUET"
     )
   }
 

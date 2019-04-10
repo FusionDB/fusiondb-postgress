@@ -19,7 +19,7 @@ import org.apache.spark.sql.catalyst.TableIdentifier
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 case class LoadDataCommand(
-     dataSource: String,
+     sourceType: String,
      formatType: String,
      path: String,
      tableName: TableIdentifier,
@@ -28,6 +28,7 @@ case class LoadDataCommand(
     if (path != null) {
       val df = sparkSession.read.format(formatType).options(options).load(path)
       df.createTempView(tableName.table)
+
     } else {
       val df = sparkSession.read.format(formatType).options(options).load()
       df.createTempView(tableName.table)
@@ -36,19 +37,27 @@ case class LoadDataCommand(
 }
 
 case class SaveDataCommand(
-                            formatType: String,
-                            path: String,
-                            viewTable: TableIdentifier,
-                            targetSource: String,
-                            options: Map[String, String],
-                            mode: String = "ErrorIfExists") extends RunnableCommand {
+      sourceType: String,
+      mode: String,
+      formatType: String,
+      path: String,
+      viewTable: TableIdentifier,
+      options: Map[String, String]) extends RunnableCommand {
   override def run(sparkSession: SparkSession): Unit = {
     if (path != null) {
       val vt = sparkSession.sql("select * from "+viewTable.table)
-      vt.write.format(formatType).options(options).mode(mode).save(path)
+      if (mode.isEmpty) {
+        vt.write.format(formatType).options(options).mode("errorifexists").save(path)
+      } else {
+        vt.write.format(formatType).options(options).mode(mode).save(path)
+      }
     } else {
       val vt = sparkSession.sql("select * from "+viewTable.table)
-      vt.write.format(formatType).options(options).mode(mode).save()
+      if (mode.isEmpty) {
+        vt.write.format(formatType).options(options).mode("errorifexists").save()
+      } else {
+        vt.write.format(formatType).options(options).mode(mode).save()
+      }
     }
   }
 }
