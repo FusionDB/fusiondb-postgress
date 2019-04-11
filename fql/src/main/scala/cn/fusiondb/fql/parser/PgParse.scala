@@ -15,12 +15,9 @@
 
 package cn.fusiondb.fql.parser
 
-import cn.fusiondb.core.execution.command.{LoadDataCommand, SaveDataCommand}
-import cn.fusiondb.dsl.parser.SqlBaseParser
-import cn.fusiondb.dsl.parser.SqlBaseParser.TablePropertyListContext
+import cn.fusiondb.dsl.parser.SqlBaseParser.{LoadDataExtendsContext, SaveDataContext, TablePropertyListContext}
 import org.apache.spark.sql.catalyst.expressions.PredicateHelper
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
-import org.apache.spark.sql.execution.command.ResetCommand
 import org.apache.spark.sql.fdb.execution.{SparkSqlAstBuilder, SparkSqlParser}
 import org.apache.spark.sql.internal.SQLConf
 
@@ -41,28 +38,26 @@ private[fql] class PgAstBuilder(conf: SQLConf) extends SparkSqlAstBuilder(conf)
   with PredicateHelper {
   import org.apache.spark.sql.catalyst.parser.ParserUtils._
 
-  override def visitLoadDataExtends(ctx: SqlBaseParser.LoadDataExtendsContext): LogicalPlan = withOrigin(ctx) {
+  override def visitLoadDataExtends(ctx: LoadDataExtendsContext): LogicalPlan = withOrigin(ctx) {
     val options = Option(ctx.options).map(visitPropertyKeyValues).getOrElse(Map.empty)
-    LoadDataCommand(
+    LoadDataExtendsCommand(
       sourceType = Option(ctx.sourceType).map(st => st.getText.toLowerCase).getOrElse(""),
       formatType = Option(ctx.`type`).map(st => st.getText.toLowerCase).getOrElse(""),
       path = Option(ctx.path).map(st => st.getText.toLowerCase).getOrElse("").replace("'",""),
       tableName = visitTableIdentifier(ctx.tableIdentifier()),
       options)
-    ResetCommand
   }
 
-  override def visitSaveData(ctx: SqlBaseParser.SaveDataContext) : LogicalPlan = withOrigin(ctx) {
+  override def visitSaveData(ctx: SaveDataContext) : LogicalPlan = withOrigin(ctx) {
     val options = Option(ctx.options).map(visitPropertyKeyValues).getOrElse(Map.empty)
     val partitionByColumn = ctx.identifier()
-    SaveDataCommand(
+    SaveDataExtendsCommand(
       sourceType = Option(ctx.sourceType).map(st => st.getText.toLowerCase).getOrElse(""),
       mode = Option(ctx.saveMode).map(st => st.getText.toLowerCase).getOrElse(""),
       formatType = Option(ctx.`type`).map(st => st.getText.toLowerCase).getOrElse(""),
       path = Option(ctx.path).map(st => st.getText.toLowerCase).getOrElse("").replace("'",""),
       viewTable = visitTableIdentifier(ctx.tableName),
       options)
-    ResetCommand
   }
 
   /**

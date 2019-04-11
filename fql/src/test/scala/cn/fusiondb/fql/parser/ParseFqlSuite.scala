@@ -24,7 +24,9 @@ class ParseFqlSuite extends FunSuite with BeforeAndAfterAll {
 
   val spark = SparkSession.builder.master("local").appName("ParseFql").getOrCreate()
 
-  lazy val parser = new FqlParse(new SQLConf(), spark)
+  lazy val fql = new FqlParse(new SQLConf(), spark)
+  lazy val pql = new PgParse(new SQLConf())
+
   lazy val sqlContext = TestHive
 
   override protected def beforeAll() : Unit = {
@@ -32,8 +34,21 @@ class ParseFqlSuite extends FunSuite with BeforeAndAfterAll {
   }
 
   def assertValidSQLString(sparkSql: String, pgSql: String): Unit = {
-    parser.parsePlan(sparkSql)
-    parser.parsePlan(pgSql)
+    fql.parsePlan(sparkSql)
+    fql.parsePlan(pgSql)
+  }
+
+  def assertValidSQLStringForPg(sparkSql: String, pgSql: String): Unit = {
+    val p1 = pql.parsePlan(sparkSql)
+    val p2 = pql.parsePlan(pgSql)
+    print(p2.treeString)
+  }
+
+  test("pql parse") {
+    assertValidSQLStringForPg(
+      "load 'file:///data/github/fusiondb/data/csv' format csv options('inferSchema'='true', 'header'='true') as t1",
+      "SAVE append T1 TO 'file:///data/github/fusiondb/data/csv/t1' FORMAT CSV options('inferSchema'='true', 'header'='true')"
+    )
   }
 
   test("~") {
@@ -46,7 +61,7 @@ class ParseFqlSuite extends FunSuite with BeforeAndAfterAll {
   test("load & save file") {
     assertValidSQLString(
       "load 'file:///data/github/fusiondb/data/csv' format csv options('inferSchema'='true', 'header'='true') as t1",
-      "SAVE append T1 TO 'file:///data/github/fusiondb/data/csv/t1' FORMAT PARQUET"
+      "SAVE APPEND T1 TO 'file:///data/github/fusiondb/data/csv/t1' FORMAT PARQUET"
     )
   }
 
