@@ -167,9 +167,9 @@ statement
     | CLEAR CACHE                                                      #clearCache
     | LOAD DATA LOCAL? INPATH path=STRING OVERWRITE? INTO TABLE
         tableIdentifier partitionSpec?                                 #loadData
-    | LOAD (path=STRING | sourceType=identifier) (FORMAT type=identifier)?
+    | LOAD source=STRING (FORMAT type=identifier)?
         (OPTIONS options=tablePropertyList)? AS tableIdentifier        #loadDataExtends
-    | SAVE saveMode=identifier? tableName=tableIdentifier TO (path=STRING | sourceType=identifier)
+    | SAVE saveMode=identifier? tableName=tableIdentifier TO source=STRING
         (FORMAT type=identifier)?
         (OPTIONS options=tablePropertyList)?
         (PARTITION BY identifier)?                                     #saveData

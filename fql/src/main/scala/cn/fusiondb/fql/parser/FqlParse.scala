@@ -44,9 +44,8 @@ class FqlAstBuilder(conf: SQLConf, sparkSession: SparkSession) extends AstBuilde
   override def visitLoadDataExtends(ctx: SqlBaseParser.LoadDataExtendsContext): LogicalPlan = withOrigin(ctx) {
     val options = Option(ctx.options).map(visitPropertyKeyValues).getOrElse(Map.empty)
     LoadDataCommand(
-      sourceType = Option(ctx.sourceType).map(st => st.getText.toLowerCase).getOrElse(""),
+      source = ctx.source.getText.replace("'","").toLowerCase,
       formatType = Option(ctx.`type`).map(st => st.getText.toLowerCase).getOrElse(""),
-      path = Option(ctx.path).map(st => st.getText.toLowerCase).getOrElse("").replace("'",""),
       tableName = visitTableIdentifier(ctx.tableIdentifier()),
       options).run(sparkSession)
     ResetCommand
@@ -56,10 +55,9 @@ class FqlAstBuilder(conf: SQLConf, sparkSession: SparkSession) extends AstBuilde
     val options = Option(ctx.options).map(visitPropertyKeyValues).getOrElse(Map.empty)
     val partitionByColumn = ctx.identifier()
     SaveDataCommand(
-      sourceType = Option(ctx.sourceType).map(st => st.getText.toLowerCase).getOrElse(""),
+      source = ctx.source.getText.replace("'","").toLowerCase,
       mode = Option(ctx.saveMode).map(st => st.getText.toLowerCase).getOrElse(""),
       formatType = Option(ctx.`type`).map(st => st.getText.toLowerCase).getOrElse(""),
-      path = Option(ctx.path).map(st => st.getText.toLowerCase).getOrElse("").replace("'",""),
       viewTable = visitTableIdentifier(ctx.tableName),
       options).run(sparkSession)
     ResetCommand

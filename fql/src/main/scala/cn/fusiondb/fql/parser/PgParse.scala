@@ -41,9 +41,8 @@ private[fql] class PgAstBuilder(conf: SQLConf) extends SparkSqlAstBuilder(conf)
   override def visitLoadDataExtends(ctx: LoadDataExtendsContext): LogicalPlan = withOrigin(ctx) {
     val options = Option(ctx.options).map(visitPropertyKeyValues).getOrElse(Map.empty)
     LoadDataExtendsCommand(
-      sourceType = Option(ctx.sourceType).map(st => st.getText.toLowerCase).getOrElse(""),
+      source = ctx.source.getText.replace("'","").toLowerCase,
       formatType = Option(ctx.`type`).map(st => st.getText.toLowerCase).getOrElse(""),
-      path = Option(ctx.path).map(st => st.getText.toLowerCase).getOrElse("").replace("'",""),
       tableName = visitTableIdentifier(ctx.tableIdentifier()),
       options)
   }
@@ -51,11 +50,12 @@ private[fql] class PgAstBuilder(conf: SQLConf) extends SparkSqlAstBuilder(conf)
   override def visitSaveData(ctx: SaveDataContext) : LogicalPlan = withOrigin(ctx) {
     val options = Option(ctx.options).map(visitPropertyKeyValues).getOrElse(Map.empty)
     val partitionByColumn = ctx.identifier()
+    // sourceType is fileSystem represents a path，sourceType is rdbms or nosql represents a datasource type.
+    val source = ctx.source.getText.replace("'","").toLowerCase
     SaveDataExtendsCommand(
-      sourceType = Option(ctx.sourceType).map(st => st.getText.toLowerCase).getOrElse(""),
+      source,
       mode = Option(ctx.saveMode).map(st => st.getText.toLowerCase).getOrElse(""),
       formatType = Option(ctx.`type`).map(st => st.getText.toLowerCase).getOrElse(""),
-      path = Option(ctx.path).map(st => st.getText.toLowerCase).getOrElse("").replace("'",""),
       viewTable = visitTableIdentifier(ctx.tableName),
       options)
   }

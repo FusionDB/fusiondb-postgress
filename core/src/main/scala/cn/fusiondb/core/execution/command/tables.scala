@@ -19,45 +19,45 @@ import org.apache.spark.sql.catalyst.TableIdentifier
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 case class LoadDataCommand(
-     sourceType: String,
+     source: String,
      formatType: String,
-     path: String,
      tableName: TableIdentifier,
      options: Map[String, String]) extends RunnableCommand {
   override def run(sparkSession: SparkSession): Unit = {
-    if (path != null) {
-      val df = sparkSession.read.format(formatType).options(options).load(path)
-      df.createTempView(tableName.table)
-
-    } else {
-      val df = sparkSession.read.format(formatType).options(options).load()
-      df.createTempView(tableName.table)
+    source.split(":")(0) match {
+      case "mysql" | "oracle" | "sqlserver" | "postgresql" =>
+        sparkSession.read.format(formatType).options(options).load().createTempView(tableName.table)
+      case "hdfs" | "s3" | "adls" | "file" =>
+        sparkSession.read.format(formatType).options(options).load(source).createTempView(tableName.table)
+      case _ =>
+        throw new Exception("Unsupported datasource "+source)
     }
   }
 }
 
 case class SaveDataCommand(
-      sourceType: String,
+      source: String,
       mode: String,
       formatType: String,
-      path: String,
       viewTable: TableIdentifier,
       options: Map[String, String]) extends RunnableCommand {
   override def run(sparkSession: SparkSession): Unit = {
-    if (path != null) {
-      val vt = sparkSession.sql("select * from "+viewTable.table)
-      if (mode.isEmpty) {
-        vt.write.format(formatType).options(options).mode("errorifexists").save(path)
-      } else {
-        vt.write.format(formatType).options(options).mode(mode).save(path)
-      }
-    } else {
-      val vt = sparkSession.sql("select * from "+viewTable.table)
-      if (mode.isEmpty) {
-        vt.write.format(formatType).options(options).mode("errorifexists").save()
-      } else {
-        vt.write.format(formatType).options(options).mode(mode).save()
-      }
+    val vt = sparkSession.sql("select * from "+viewTable.table)
+    source.split(":")(0) match {
+      case "mysql" | "oracle" | "sqlserver" | "postgresql" =>
+        if (mode.isEmpty) {
+          vt.write.format(formatType).options(options).save()
+        } else {
+          vt.write.format(formatType).options(options).mode(mode).save()
+        }
+      case "hdfs" | "s3" | "adls" | "file" =>
+        if (mode.isEmpty) {
+          vt.write.format(formatType).options(options).save(source)
+        } else {
+          vt.write.format(formatType).options(options).mode(mode).save(source)
+        }
+      case _ =>
+        throw new Exception("Unsupported datasource "+source)
     }
   }
 }
