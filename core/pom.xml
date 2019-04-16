@@ -5,13 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>fusiondb</artifactId>
+        <artifactId>fusiondb_2.11</artifactId>
         <groupId>cn.fusiondb</groupId>
         <version>0.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>fusiondb-core</artifactId>
+    <artifactId>fusiondb-core_2.11</artifactId>
     <packaging>jar</packaging>
     <name>Fusiondb Project Core</name>
     <url>http://fusiondb.cn/</url>
@@ -21,9 +21,13 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+        </dependency>
     </dependencies>
-
-    <build>
-    </build>
-
 </project>

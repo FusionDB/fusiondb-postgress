@@ -46,7 +46,7 @@ This file is divided into 3 sections:
 
     <check level="error" class="org.scalastyle.file.FileTabChecker" enabled="true"></check>
 
-<!--    <check level="error" class="org.scalastyle.file.HeaderMatchesChecker" enabled="true">
+    <check level="error" class="org.scalastyle.file.HeaderMatchesChecker" enabled="true">
         <parameters>
             <parameter name="header"><![CDATA[/*
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -65,7 +65,7 @@ This file is divided into 3 sections:
  * limitations under the License.
  */]]></parameter>
         </parameters>
-    </check>-->
+    </check>
 
     <check level="error" class="org.scalastyle.scalariform.SpacesAfterPlusChecker" enabled="true"></check>
 
@@ -86,14 +86,14 @@ This file is divided into 3 sections:
     </check>
 
     <check level="error" class="org.scalastyle.scalariform.ObjectNamesChecker" enabled="true">
-        <parameters><parameter name="regex"><![CDATA[(config|[A-Z][A-Za-z]*)]]></parameter></parameters>
+        <parameters><parameter name="regex"><![CDATA[[A-Z][A-Za-z]*]]></parameter></parameters>
     </check>
 
     <check level="error" class="org.scalastyle.scalariform.PackageObjectNamesChecker" enabled="true">
         <parameters><parameter name="regex"><![CDATA[^[a-z][A-Za-z]*$]]></parameter></parameters>
     </check>
 
-    <check customId="argcount" level="error" class="org.scalastyle.scalariform.ParameterNumberChecker" enabled="true">
+    <check level="error" class="org.scalastyle.scalariform.ParameterNumberChecker" enabled="true">
         <parameters><parameter name="maxParameters"><![CDATA[10]]></parameter></parameters>
     </check>
 
@@ -135,6 +135,12 @@ This file is divided into 3 sections:
     <!-- ??? usually shouldn't be checked into the code base. -->
     <check level="error" class="org.scalastyle.scalariform.NotImplementedErrorUsage" enabled="true"></check>
 
+    <!-- As of SPARK-7558, all tests in Spark should extend o.a.s.SparkFunSuite instead of FunSuite directly -->
+    <check customId="funsuite" level="error" class="org.scalastyle.scalariform.TokenChecker" enabled="true">
+        <parameters><parameter name="regex">^FunSuite[A-Za-z]*$</parameter></parameters>
+        <customMessage>Tests must extend org.apache.spark.SparkFunSuite instead.</customMessage>
+    </check>
+
     <!-- As of SPARK-7977 all printlns need to be wrapped in '// scalastyle:off/on println' -->
     <check customId="println" level="error" class="org.scalastyle.scalariform.TokenChecker" enabled="true">
         <parameters><parameter name="regex">^println$</parameter></parameters>
@@ -148,18 +154,6 @@ This file is divided into 3 sections:
         <parameters><parameter name="regex">@VisibleForTesting</parameter></parameters>
         <customMessage><![CDATA[
       @VisibleForTesting causes classpath issues. Please note this in the java doc instead (SPARK-11615).
-    ]]></customMessage>
-    </check>
-
-    <check customId="runtimeaddshutdownhook" level="error" class="org.scalastyle.file.RegexChecker" enabled="true">
-        <parameters><parameter name="regex">Runtime\.getRuntime\.addShutdownHook</parameter></parameters>
-        <customMessage><![CDATA[
-      Are you sure that you want to use Runtime.getRuntime.addShutdownHook? In most cases, you should use
-      ShutdownHookManager.addShutdownHook instead.
-      If you must use Runtime.getRuntime.addShutdownHook, wrap the code block with
-      // scalastyle:off runtimeaddshutdownhook
-      Runtime.getRuntime.addShutdownHook(...)
-      // scalastyle:on runtimeaddshutdownhook
     ]]></customMessage>
     </check>
 
@@ -208,30 +202,6 @@ This file is divided into 3 sections:
     ]]></customMessage>
     </check>
 
-    <check customId="caselocale" level="error" class="org.scalastyle.file.RegexChecker" enabled="true">
-        <parameters><parameter name="regex">(\.toUpperCase|\.toLowerCase)(?!(\(|\(Locale.ROOT\)))</parameter></parameters>
-        <customMessage><![CDATA[
-      Are you sure that you want to use toUpperCase or toLowerCase without the root locale? In most cases, you
-      should use toUpperCase(Locale.ROOT) or toLowerCase(Locale.ROOT) instead.
-      If you must use toUpperCase or toLowerCase without the root locale, wrap the code block with
-      // scalastyle:off caselocale
-      .toUpperCase
-      .toLowerCase
-      // scalastyle:on caselocale
-    ]]></customMessage>
-    </check>
-
-    <check customId="throwerror" level="error" class="org.scalastyle.file.RegexChecker" enabled="true">
-        <parameters><parameter name="regex">throw new \w+Error\(</parameter></parameters>
-        <customMessage><![CDATA[
-      Are you sure that you want to throw Error? In most cases, you should use appropriate Exception instead.
-      If you must throw Error, wrap the code block with
-      // scalastyle:off throwerror
-      throw new XXXError(...)
-      // scalastyle:on throwerror
-    ]]></customMessage>
-    </check>
-
     <!-- As of SPARK-9613 JavaConversions should be replaced with JavaConverters -->
     <check customId="javaconversions" level="error" class="org.scalastyle.scalariform.TokenChecker" enabled="true">
         <parameters><parameter name="regex">JavaConversions</parameter></parameters>
@@ -247,16 +217,18 @@ This file is divided into 3 sections:
 
     <check customId="extractopt" level="error" class="org.scalastyle.scalariform.TokenChecker" enabled="true">
         <parameters><parameter name="regex">extractOpt</parameter></parameters>
-        <customMessage>Use jsonOption(x).map(.extract[T]) instead of .extractOpt[T], as the latter
+        <customMessage>Use Utils.jsonOption(x).map(.extract[T]) instead of .extractOpt[T], as the latter
             is slower.  </customMessage>
     </check>
 
     <check level="error" class="org.scalastyle.scalariform.ImportOrderChecker" enabled="true">
         <parameters>
-            <parameter name="groups">java,scala,fusiondb</parameter>
+            <parameter name="groups">java,scala,3rdParty,spark,fusiondb</parameter>
             <parameter name="group.java">javax?\..*</parameter>
             <parameter name="group.scala">scala\..*</parameter>
+            <parameter name="group.3rdParty">(?!org\.apache\.spark\.).*</parameter>
             <parameter name="group.fusiondb">cn\.fusiondb\..*</parameter>
+            <parameter name="group.spark">org\.apache\.spark\..*</parameter>
         </parameters>
     </check>
 
@@ -264,6 +236,14 @@ This file is divided into 3 sections:
         <parameters>
             <parameter name="tokens">COMMA</parameter>
         </parameters>
+    </check>
+
+    <!-- SPARK-3854: Single Space between ')' and '{' -->
+    <check customId="SingleSpaceBetweenRParenAndLCurlyBrace" level="error" class="org.scalastyle.file.RegexChecker" enabled="true">
+        <parameters><parameter name="regex">\)\{</parameter></parameters>
+        <customMessage><![CDATA[
+      Single Space between ')' and `{`.
+    ]]></customMessage>
     </check>
 
     <check customId="NoScalaDoc" level="error" class="org.scalastyle.file.RegexChecker" enabled="true">
@@ -277,7 +257,10 @@ This file is divided into 3 sections:
     </check>
 
     <!-- SPARK-16877: Avoid Java annotations -->
-    <check level="error" class="org.scalastyle.scalariform.OverrideJavaChecker" enabled="true"></check>
+    <check customId="OverrideJavaCase" level="error" class="org.scalastyle.scalariform.TokenChecker" enabled="true">
+        <parameters><parameter name="regex">^Override$</parameter></parameters>
+        <customMessage>override modifier should be used instead of @java.lang.Override.</customMessage>
+    </check>
 
     <check level="error" class="org.scalastyle.scalariform.DeprecatedJavaChecker" enabled="true"></check>
 
