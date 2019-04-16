@@ -79,6 +79,7 @@ work/
 docs/.jekyll-metadata
 thirdparty/livy-*
 thirdparty/spark-*
+assembly/fusiondb-*
 
 # For Hive
 TempStatsStore/
