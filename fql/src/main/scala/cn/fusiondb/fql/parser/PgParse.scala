@@ -50,10 +50,8 @@ private[fql] class PgAstBuilder(conf: SQLConf) extends SparkSqlAstBuilder(conf)
   override def visitSaveData(ctx: SaveDataContext) : LogicalPlan = withOrigin(ctx) {
     val options = Option(ctx.options).map(visitPropertyKeyValues).getOrElse(Map.empty)
     val partitionByColumn = ctx.identifier()
-    // sourceType is fileSystem represents a path，sourceType is rdbms or nosql represents a datasource type.
-    val source = ctx.source.getText.replace("'","").toLowerCase
     SaveDataExtendsCommand(
-      source,
+      source = ctx.source.getText.replace("'","").toLowerCase,
       mode = Option(ctx.saveMode).map(st => st.getText.toLowerCase).getOrElse(""),
       formatType = Option(ctx.`type`).map(st => st.getText.toLowerCase).getOrElse(""),
       viewTable = visitTableIdentifier(ctx.tableName),
@@ -67,7 +65,8 @@ private[fql] class PgAstBuilder(conf: SQLConf) extends SparkSqlAstBuilder(conf)
     val props = ctx.tableProperty()
     var map: Map[String, String] = Map()
     for (i <- 0 to props.size()-1) {
-      map += (props.get(i).key.start.getText -> props.get(i).value.getStart.getText)
+      map += (props.get(i).key.start.getText.replace("'","").toLowerCase
+        -> props.get(i).value.getStart.getText.replace("'","").toLowerCase)
     }
     map
   }

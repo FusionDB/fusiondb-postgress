@@ -15,14 +15,17 @@
 
 package cn.fusiondb.fql.parser
 
+import org.apache.spark.SparkFunSuite
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.hive.test.TestHive
 import org.apache.spark.sql.internal.SQLConf
-import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
-class ParseFqlSuite extends FunSuite with BeforeAndAfterAll {
+class ParseFqlSuite extends SparkFunSuite {
 
-  val spark = SparkSession.builder.master("local").appName("ParseFql").enableHiveSupport().getOrCreate()
+  val spark = SparkSession.builder.master("local")
+    .appName("ParseFql")
+    .enableHiveSupport()
+    .getOrCreate()
 
   lazy val fql = new FqlParse(new SQLConf(), spark)
   lazy val pql = new PgParse(new SQLConf())
@@ -36,53 +39,56 @@ class ParseFqlSuite extends FunSuite with BeforeAndAfterAll {
   def assertValidSQLString(sparkSql: String, pgSql: String): Unit = {
     var p1 = fql.parsePlan(sparkSql)
     var p2 = fql.parsePlan(pgSql)
-    println(p1.treeString)
-    println(p2.treeString)
+    // println(p1.treeString)
+    // println(p2.treeString)
   }
 
   def assertValidSQLStringForPg(sparkSql: String, pgSql: String): Unit = {
-    //spark.sql("create table if not exists t1(a int,b string,c int)")
+    // spark.sql("create table if not exists t1(a int,b string,c int)")
     val p1 = pql.parsePlan(sparkSql)
     val qe = spark.sessionState.executePlan(p1)
     qe.assertAnalyzed()
-    println(qe.optimizedPlan.numberedTreeString)
+    // println(qe.optimizedPlan.numberedTreeString)
 
     val rdd = qe.executedPlan.execute()
 
     val p2 = pql.parsePlan(pgSql)
     val qe2 = spark.sessionState.executePlan(p2)
     qe2.assertAnalyzed()
-    println(qe2.optimizedPlan.numberedTreeString)
+    // println(qe2.optimizedPlan.numberedTreeString)
 
     val rdd2 = qe2.executedPlan.execute()
-    println(rdd2.collect().foreach(println))
+    // println(rdd2.collect().foreach(println))
   }
 
   test("pql parse") {
     assertValidSQLStringForPg(
-      "load 'file:///data/github/fusiondb/data/csv' format csv options('inferSchema'='true', 'header'='true') as t1",
-      "SAVE APPEND T1 TO 'file://data/github/fusiondb/data/csv/t1' FORMAT PARQUET"
+      "load 'file:///data/github/fusiondb/data/csv' format csv " +
+        "options(inferSchema=true, header=true) as t1",
+      "SAVE APPEND T1 TO 'file:///data/github/fusiondb/data/csv/t1' FORMAT PARQUET"
     )
   }
 
   test("pql parse in load") {
     assertValidSQLStringForPg(
-      "load 'file:///data/github/fusiondb/data/csv' format csv options('inferSchema'='true', 'header'='true') as t1",
-      "LOAD DATA LOCAL INPATH './examples/files/kv1.txt' OVERWRITE INTO TABLE pokes"
+      "load 'file:///data/github/fusiondb/data/csv' format csv " +
+        "options('inferSchema'='true', 'header'='true') as t1",
+      "LOAD DATA LOCAL INPATH 'file:///data/github/fusiondb/data/csv/t1' OVERWRITE INTO TABLE pokes"
     )
   }
 
   test("~") {
     assertValidSQLString(
       "SELECT * FROM testData WHERE value RLIKE 'abc'",
-      "LOAD DATA LOCAL INPATH './examples/files/kv1.txt' OVERWRITE INTO TABLE pokes"
+      "LOAD DATA LOCAL INPATH 'file:///data/github/fusiondb/data/csv/t1' OVERWRITE INTO TABLE pokes"
     )
   }
 
   test("load & save file") {
     assertValidSQLString(
-      "load 'file:///data/github/fusiondb/data/csv' format csv options('inferSchema'='true', 'header'='true') as t1",
-      "SAVE APPEND T1 TO 'file:///data/github/fusiondb/data/csv/t1' FORMAT PARQUET"
+      "load 'file:///data/github/fusiondb/data/csv' format csv " +
+        "options('inferSchema'='true', 'header'='true') as t1",
+      "SAVE APPEND T1 TO 'file:///data/github/fusiondb/data/csv/t1' FORMAT parquet"
     )
   }
 

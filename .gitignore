@@ -77,6 +77,8 @@ target/
 unit-tests.log
 work/
 docs/.jekyll-metadata
+thirdparty/livy-*
+thirdparty/spark-*
 
 # For Hive
 TempStatsStore/

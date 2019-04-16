@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>cn.fusiondb</groupId>
-    <artifactId>fusiondb</artifactId>
+    <artifactId>fusiondb_2.11</artifactId>
     <packaging>pom</packaging>
     <version>0.1-SNAPSHOT</version>
     <name>Fusiondb Project Parent POM</name>
@@ -26,10 +26,11 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.version>3.5.4</maven.version>
-        <scala.version>2.12.7</scala.version>
-        <scala.binary.version>2.12</scala.binary.version>
+        <scala.version>2.11.12</scala.version>
+        <scala.binary.version>2.11</scala.binary.version>
         <kryo.version>2.22</kryo.version>
         <spark.version>2.4.0</spark.version>
+        <livy.version>0.5.0-incubating</livy.version>
         <mockito.version>1.9.5</mockito.version>
         <zookeeper.version>3.4.6</zookeeper.version>
         <hadoop.version>2.7.3</hadoop.version>
@@ -43,7 +44,9 @@
         <junit.version>4.12</junit.version>
         <commons-lang3.version>3.5</commons-lang3.version>
         <slf4j.version>1.7.16</slf4j.version>
+        <postgresql.version>42.2.2</postgresql.version>
         <log4j.version>1.2.17</log4j.version>
+        <mysql.version>5.1.6</mysql.version>
 
         <test.java.home>${java.home}</test.java.home>
         <execution.root>${user.dir}</execution.root>
@@ -89,33 +92,19 @@
 
     <dependencies>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>${mockito.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <!--
-         This is needed by the scalatest plugin, and so is declared here to be available in
-         all child modules, just as scalatest is run in all children
-        -->
-        <dependency>
             <groupId>org.scalatest</groupId>
             <artifactId>scalatest_${scala.binary.version}</artifactId>
             <version>${scalatest.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
-
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>${mysql.version}</version>
+            </dependency>
             <!-- Shaded deps marked as provided. These are promoted to compile scope
                  in the modules where we want the shaded classes to appear in the
                  associated jar. -->
@@ -133,18 +122,29 @@
                 <version>${scala.version}</version>
                 <scope>provided</scope>
             </dependency>
-
             <dependency>
-                <groupId>com.thoughtworks.paranamer</groupId>
-                <artifactId>paranamer</artifactId>
-                <version>${paranamer.version}</version>
-                <scope>runtime</scope>
+                <groupId>org.apache.spark</groupId>
+                <artifactId>spark-catalyst_${scala.binary.version}</artifactId>
+                <version>${spark.version}</version>
+                <scope>provided</scope>
             </dependency>
-
             <dependency>
-                <groupId>com.esotericsoftware.kryo</groupId>
-                <artifactId>kryo</artifactId>
-                <version>${kryo.version}</version>
+                <groupId>org.apache.spark</groupId>
+                <artifactId>spark-sql_${scala.binary.version}</artifactId>
+                <version>${spark.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.spark</groupId>
+                <artifactId>spark-hive_${scala.binary.version}</artifactId>
+                <version>${spark.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.spark</groupId>
+                <artifactId>spark-core_${scala.binary.version}</artifactId>
+                <version>${spark.version}</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.apache.zookeeper</groupId>
@@ -202,55 +202,52 @@
             </dependency>
 
             <dependency>
-                <groupId>org.apache.spark</groupId>
-                <artifactId>spark-launcher_${scala.binary.version}</artifactId>
-                <version>${spark.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.spark-project.spark</groupId>
-                        <artifactId>unused</artifactId>
-                    </exclusion>
-                </exclusions>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${postgresql.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.apache.spark</groupId>
-                <artifactId>spark-repl_${scala.binary.version}</artifactId>
-                <version>${spark.version}</version>
+                <groupId>org.apache.livy</groupId>
+                <artifactId>livy-client-http</artifactId>
+                <version>${livy.version}</version>
+                <scope>compile</scope>
             </dependency>
 
             <dependency>
-                <groupId>org.apache.spark</groupId>
-                <artifactId>spark-streaming_${scala.binary.version}</artifactId>
-                <version>${spark.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.spark</groupId>
-                <artifactId>spark-yarn_${scala.binary.version}</artifactId>
-                <version>${spark.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.spark</groupId>
-                <artifactId>spark-catalyst_${scala.binary.version}</artifactId>
-                <version>${spark.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.spark</groupId>
-                <artifactId>spark-sql_${scala.binary.version}</artifactId>
-                <version>${spark.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.spark</groupId>
-                <artifactId>spark-hive_${scala.binary.version}</artifactId>
-                <version>${spark.version}</version>
+                <groupId>org.scalatest</groupId>
+                <artifactId>scalatest_${scala.binary.version}</artifactId>
+                <version>${scalatest.version}</version>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.apache.spark</groupId>
                 <artifactId>spark-core_${scala.binary.version}</artifactId>
                 <version>${spark.version}</version>
+                <type>test-jar</type>
+                <scope>test</scope>
             </dependency>
-
+            <dependency>
+                <groupId>org.apache.spark</groupId>
+                <artifactId>spark-catalyst_${scala.binary.version}</artifactId>
+                <version>${spark.version}</version>
+                <type>test-jar</type>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.spark</groupId>
+                <artifactId>spark-sql_${scala.binary.version}</artifactId>
+                <version>${spark.version}</version>
+                <type>test-jar</type>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.spark</groupId>
+                <artifactId>spark-hive_${scala.binary.version}</artifactId>
+                <version>${spark.version}</version>
+                <type>test-jar</type>
+                <scope>test</scope>
+            </dependency>
             <dependency>
                 <groupId>org.apache.curator</groupId>
                 <artifactId>curator-test</artifactId>
@@ -303,16 +300,16 @@
             <plugin>
                 <groupId>org.scalastyle</groupId>
                 <artifactId>scalastyle-maven-plugin</artifactId>
-                <version>1.0.0</version>
+                <version>0.8.0</version>
                 <configuration>
                     <verbose>false</verbose>
                     <failOnViolation>true</failOnViolation>
-                    <includeTestSourceDirectory>false</includeTestSourceDirectory>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
                     <failOnWarning>false</failOnWarning>
-                    <sourceDirectory>${basedir}/src/main/scala</sourceDirectory>
-                    <testSourceDirectory>${basedir}/src/test/scala</testSourceDirectory>
+                    <sourceDirectory>src/main/scala</sourceDirectory>
+                    <testSourceDirectory>src/test/scala</testSourceDirectory>
                     <configLocation>scalastyle-config.xml</configLocation>
-                    <outputFile>${basedir}/target/scalastyle-output.xml</outputFile>
+                    <outputFile>target/scalastyle-output.xml</outputFile>
                     <inputEncoding>${project.build.sourceEncoding}</inputEncoding>
                     <outputEncoding>${project.reporting.outputEncoding}</outputEncoding>
                 </configuration>
@@ -404,16 +401,42 @@
                 <version>2.19.1</version>
                 <!-- Note config is repeated in scalatest config -->
                 <configuration>
+                    <includes>
+                        <include>**/Test*.java</include>
+                        <include>**/*Test.java</include>
+                        <include>**/*TestCase.java</include>
+                        <include>**/*Suite.java</include>
+                    </includes>
+                    <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
+                    <argLine>-Xmx3g -Xss4096k -XX:MaxMetaspaceSize=${MaxMetaspaceSize} -XX:ReservedCodeCacheSize=512m</argLine>
                     <environmentVariables>
-                        <LIVY_TEST>true</LIVY_TEST>
-                        <SPARK_HOME>${spark.home}</SPARK_HOME>
+                        <!--
+                          Setting SPARK_DIST_CLASSPATH is a simple way to make sure any child processes
+                          launched by the tests have access to the correct test-time classpath.
+                        -->
+                        <SPARK_DIST_CLASSPATH>${test_classpath}</SPARK_DIST_CLASSPATH>
+                        <SPARK_PREPEND_CLASSES>1</SPARK_PREPEND_CLASSES>
+                        <SPARK_SCALA_VERSION>${scala.binary.version}</SPARK_SCALA_VERSION>
+                        <SPARK_TESTING>1</SPARK_TESTING>
+                        <JAVA_HOME>${test.java.home}</JAVA_HOME>
                     </environmentVariables>
                     <systemProperties>
+                        <log4j.configuration>file:src/test/resources/log4j.properties</log4j.configuration>
+                        <derby.system.durability>test</derby.system.durability>
                         <java.awt.headless>true</java.awt.headless>
                         <java.io.tmpdir>${project.build.directory}/tmp</java.io.tmpdir>
-                        <livy.environment>development</livy.environment>
+                        <spark.test.home>${spark.test.home}</spark.test.home>
+                        <spark.testing>1</spark.testing>
+                        <spark.master.rest.enabled>false</spark.master.rest.enabled>
+                        <spark.ui.enabled>false</spark.ui.enabled>
+                        <spark.ui.showConsoleProgress>false</spark.ui.showConsoleProgress>
+                        <spark.unsafe.exceptionOnMemoryLeak>true</spark.unsafe.exceptionOnMemoryLeak>
+                        <spark.memory.debugFill>true</spark.memory.debugFill>
+                        <!-- Needed by sql/hive tests. -->
+                        <test.src.tables>src</test.src.tables>
                     </systemProperties>
                     <failIfNoTests>false</failIfNoTests>
+                    <excludedGroups>${test.exclude.tags}</excludedGroups>
                 </configuration>
                 <executions>
                     <execution>
@@ -424,7 +447,6 @@
                     </execution>
                 </executions>
             </plugin>
-
             <!-- Scalatest runs all Scala tests -->
             <plugin>
                 <groupId>org.scalatest</groupId>
@@ -447,7 +469,6 @@
                         <SPARK_SCALA_VERSION>${scala.binary.version}</SPARK_SCALA_VERSION>
                         <SPARK_TESTING>1</SPARK_TESTING>
                         <JAVA_HOME>${test.java.home}</JAVA_HOME>
-                        <SPARK_HOME>${spark.home}</SPARK_HOME>
                     </environmentVariables>
                     <systemProperties>
                         <log4j.configuration>file:src/test/resources/log4j.properties</log4j.configuration>
@@ -482,17 +503,16 @@
                         <excludes>
                             <exclude>**/*$*</exclude>
                             <exclude>**/*$</exclude>
-                            <exclude>org/apache/spark/sql/server/ui/**</exclude>
-                            <exclude>org/apache/spark/sql/server/parser/**</exclude>
-                            <exclude>org/apache/spark/sql/server/execution/**</exclude>
-                            <exclude>org/apache/spark/sql/server/benchmark/**</exclude>
+                            <exclude>org/apache/spark/sql/fdb/ui/**</exclude>
+                            <exclude>org/apache/spark/sql/fdb/parser/**</exclude>
+                            <exclude>org/apache/spark/sql/fdb/execution/**</exclude>
+                            <exclude>org/apache/spark/sql/fdb/benchmark/**</exclude>
                         </excludes>
                     </instrumentation>
                     <format>xml</format>
                     <maxmem>256m</maxmem>
                     <!-- aggregated reports for multi-module projects -->
                     <aggregate>true</aggregate>
-                    <check/>
                 </configuration>
             </plugin>
             <plugin>
@@ -566,5 +586,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

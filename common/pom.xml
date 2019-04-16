@@ -5,21 +5,20 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>fusiondb</artifactId>
+        <artifactId>fusiondb_2.11</artifactId>
         <groupId>cn.fusiondb</groupId>
         <version>0.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>fusiondb-common</artifactId>
+    <artifactId>fusiondb-common_2.11</artifactId>
+    <packaging>jar</packaging>
+    <name>Fusiondb Project Common</name>
+    <url>http://fusiondb.cn/</url>
 
     <properties>
         <sbt.project.name>common</sbt.project.name>
     </properties>
-
-    <packaging>jar</packaging>
-    <name>Fusiondb Project Common</name>
-    <url>http://fusiondb.cn/</url>
 
     <dependencies>
         <dependency>

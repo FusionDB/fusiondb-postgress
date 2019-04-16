@@ -15,8 +15,6 @@
 
 package cn.fusiondb.fql.internal
 
-import cn.fusiondb.common.internal.Logging
-
-class FQLConf extends Serializable with Logging {
+class FQLConf extends Serializable {
 
 }

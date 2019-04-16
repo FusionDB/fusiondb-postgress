@@ -178,6 +178,8 @@ statement
     | op=(ADD | LIST) identifier .*?                                   #manageResource
     | SET ROLE .*?                                                     #failNativeCommand
     | SET .*?                                                          #setConfiguration
+    // `BEGIN` is implicitly issued from PostgreSQL JDBC drivers
+    | BEGIN                                                            #beginTransaction
     | RESET                                                            #resetConfiguration
     | unsupportedHiveNativeCommands .*?                                #failNativeCommand
     ;
@@ -576,12 +578,14 @@ predicate
     | NOT? kind=IN '(' expression (',' expression)* ')'
     | NOT? kind=IN '(' query ')'
     | NOT? kind=(RLIKE | LIKE) pattern=valueExpression
+    | NOT? kind=PGOPERATOR '(' (db=identifier '.')? opName=identifier ')' right=valueExpression
     | IS NOT? kind=NULL
     | IS NOT? kind=DISTINCT FROM right=valueExpression
     ;
 
 valueExpression
     : primaryExpression                                                                      #valueExpressionDefault
+    | '$' INTEGER_VALUE                                                                      #paramPlaceHolder
     | operator=(MINUS | PLUS | TILDE) valueExpression                                        #arithmeticUnary
     | left=valueExpression operator=(ASTERISK | SLASH | PERCENT | DIV) right=valueExpression #arithmeticBinary
     | left=valueExpression operator=(PLUS | MINUS | CONCAT_PIPE) right=valueExpression       #arithmeticBinary
@@ -595,6 +599,8 @@ primaryExpression
     : CASE whenClause+ (ELSE elseExpression=expression)? END                                   #searchedCase
     | CASE value=expression whenClause+ (ELSE elseExpression=expression)? END                  #simpleCase
     | CAST '(' expression AS dataType ')'                                                      #cast
+    // This is needed to parse PostgreSQL-style type casts like `SELECT 1 :: TEXT`
+    | primaryExpression PGCAST pgDataType                                                      #pgStyleCast
     | STRUCT '(' (argument+=namedExpression (',' argument+=namedExpression)*)? ')'             #struct
     | FIRST '(' expression (IGNORE NULLS)? ')'                                                 #first
     | LAST '(' expression (IGNORE NULLS)? ')'                                                  #last
@@ -604,6 +610,8 @@ primaryExpression
     | qualifiedName '.' ASTERISK                                                               #star
     | '(' namedExpression (',' namedExpression)+ ')'                                           #rowConstructor
     | '(' query ')'                                                                            #subqueryExpression
+    // `substring is an internal function of PostgreSQL, e.g., `substring('Thomas' from 2 for 3)`
+    | SUBSTRING '(' primaryExpression (FROM INTEGER_VALUE)? FOR INTEGER_VALUE ')'              #substringInternalFunc
     | qualifiedName '(' (setQuantifier? argument+=expression (',' argument+=expression)*)? ')'
        (OVER windowSpec)?                                                                      #functionCall
     | qualifiedName '(' trimOption=(BOTH | LEADING | TRAILING) argument+=expression
@@ -653,6 +661,11 @@ intervalField
 intervalValue
     : (PLUS | MINUS)? (INTEGER_VALUE | DECIMAL_VALUE)
     | STRING
+    ;
+
+pgDataType
+    : (identifier '.')? dataType
+    | dataType
     ;
 
 colPosition
@@ -736,6 +749,8 @@ strictIdentifier
 
 quotedIdentifier
     : BACKQUOTED_IDENTIFIER
+    // This is needed to parse double-quoted alias names like 'SELECT 1 as "Col1"'
+    | STRING
     ;
 
 number
@@ -772,12 +787,12 @@ nonReserved
     | DBPROPERTIES | DFS | TRUNCATE | COMPUTE | LIST
     | STATISTICS | ANALYZE | PARTITIONED | EXTERNAL | DEFINED | RECORDWRITER
     | REVOKE | GRANT | LOCK | UNLOCK | MSCK | REPAIR | RECOVER | EXPORT | IMPORT | LOAD | VALUES | COMMENT | ROLE
-    | ROLES | COMPACTIONS | PRINCIPALS | TRANSACTIONS | INDEX | INDEXES | LOCKS | OPTION | LOCAL | INPATH
+    | ROLES | COMPACTIONS | PRINCIPALS | TRANSACTIONS | INDEX | INDEXES | LOCKS | OPTION | LOCAL | INPATH | SUBSTRING
     | ASC | DESC | LIMIT | RENAME | SETS
     | AT | NULLS | OVERWRITE | ALL | ANY | ALTER | AS | BETWEEN | BY | CREATE | DELETE
     | DESCRIBE | DROP | EXISTS | FALSE | FOR | GROUP | IN | INSERT | INTO | IS |LIKE
     | NULL | ORDER | OUTER | TABLE | TRUE | WITH | RLIKE
-    | AND | CASE | CAST | DISTINCT | DIV | ELSE | END | FUNCTION | INTERVAL | MACRO | OR | STRATIFY | THEN
+    | AND | CASE | CAST | PGCAST| DISTINCT | DIV | ELSE | END | FUNCTION | INTERVAL | MACRO | BEGIN | OR | STRATIFY | THEN
     | UNBOUNDED | WHEN
     | DATABASE | SELECT | FROM | WHERE | HAVING | TO | TABLE | WITH | NOT
     | DIRECTORY
@@ -810,8 +825,11 @@ NOT: 'NOT' | '!';
 NO: 'NO';
 EXISTS: 'EXISTS';
 BETWEEN: 'BETWEEN';
+PGOPERATOR: 'OPERATOR';
 LIKE: 'LIKE';
-RLIKE: 'RLIKE' | 'REGEXP';
+// `~` is a PostgreSQL-style symbol for regular expression
+RLIKE: 'RLIKE' | 'REGEXP' | PGRLIKE;
+PGRLIKE: '~';
 IS: 'IS';
 NULL: 'NULL';
 TRUE: 'TRUE';
@@ -868,6 +886,7 @@ LOGICAL: 'LOGICAL';
 CODEGEN: 'CODEGEN';
 COST: 'COST';
 CAST: 'CAST';
+PGCAST: '::';
 SHOW: 'SHOW';
 TABLES: 'TABLES';
 COLUMNS: 'COLUMNS';
@@ -897,6 +916,7 @@ TRANSACTION: 'TRANSACTION';
 COMMIT: 'COMMIT';
 ROLLBACK: 'ROLLBACK';
 MACRO: 'MACRO';
+BEGIN: 'BEGIN';
 IGNORE: 'IGNORE';
 BOTH: 'BOTH';
 LEADING: 'LEADING';
@@ -1020,10 +1040,11 @@ OPTION: 'OPTION';
 ANTI: 'ANTI';
 LOCAL: 'LOCAL';
 INPATH: 'INPATH';
+SUBSTRING: 'SUBSTRING';
 
 STRING
-    : '\'' ( ~('\''|'\\') | ('\\' .) )* '\''
-    | '"' ( ~('"'|'\\') | ('\\' .) )* '"'
+    : 'E'? '\'' ( ~('\''|'\\') | ('\\' .) )* '\''
+    | 'E'? '"' ( ~('"'|'\\') | ('\\' .) )* '"'
     ;
 
 BIGINT_LITERAL

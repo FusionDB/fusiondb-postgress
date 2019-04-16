@@ -4,13 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>fusiondb</artifactId>
+        <artifactId>fusiondb_2.11</artifactId>
         <groupId>cn.fusiondb</groupId>
         <version>0.1-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>fusiondb-flink</artifactId>
+    <artifactId>fusiondb-flink_2.11</artifactId>
     <packaging>jar</packaging>
     <name>Fusiondb Project Runtime Flink</name>
     <url>http://fusiondb.cn/</url>
@@ -19,6 +19,10 @@
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
         </dependency>
     </dependencies>
 

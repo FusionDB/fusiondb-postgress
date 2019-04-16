@@ -5,13 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>fusiondb</artifactId>
+        <artifactId>fusiondb_2.11</artifactId>
         <groupId>cn.fusiondb</groupId>
         <version>0.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>fusiondb-core</artifactId>
+    <artifactId>fusiondb-core_2.11</artifactId>
     <packaging>jar</packaging>
     <name>Fusiondb Project Core</name>
     <url>http://fusiondb.cn/</url>
@@ -22,21 +22,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>cn.fusiondb</groupId>
-            <artifactId>fusiondb-common</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-sql_${scala.binary.version}</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-hive_${scala.binary.version}</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-core_${scala.binary.version}</artifactId>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
         </dependency>
     </dependencies>
 </project>
