@@ -27,11 +27,17 @@ case class LoadDataExtendsCommand(
   override def run(sparkSession: SparkSession): Seq[Row] = {
     source.split(":")(0) match {
       case "mysql" | "oracle" | "sqlserver" | "postgresql" =>
-        sparkSession.read.format(formatType).options(options).load().createOrReplaceTempView(tableName.table)
+        sparkSession.read.format("jdbc")
+          .options(options)
+          .load()
+          .createOrReplaceTempView(tableName.table)
       case "hdfs" | "s3" | "adls" | "file" =>
-        sparkSession.read.format(formatType).options(options).load(source).createOrReplaceTempView(tableName.table)
+        sparkSession.read.format(formatType)
+          .options(options)
+          .load(source)
+          .createOrReplaceTempView(tableName.table)
       case _ =>
-        throw new Exception("Unsupported datasource "+source)
+        throw new Exception(s"Unsupported datasource $source")
     }
     Seq.empty[Row]
   }
@@ -44,13 +50,19 @@ case class SaveDataExtendsCommand(
           viewTable: TableIdentifier,
           options: Map[String, String]) extends RunnableCommand {
   override def run(sparkSession: SparkSession): Seq[Row] = {
-    val vt = sparkSession.sql("select * from "+viewTable.table)
+    val tableViewName = viewTable.table
+    val vt = sparkSession.sql(s"select * from $tableViewName")
     source.split(":")(0) match {
       case "mysql" | "oracle" | "sqlserver" | "postgresql" =>
         if (mode.isEmpty) {
-          vt.write.format(formatType).options(options).save()
+          vt.write.format("jdbc")
+            .options(options)
+            .save()
         } else {
-          vt.write.format(formatType).options(options).mode(mode).save()
+          vt.write.format("jdbc")
+            .options(options)
+            .mode(mode)
+            .save()
         }
       case "hdfs" | "s3" | "adls" | "file" =>
         if (mode.isEmpty) {
@@ -59,7 +71,7 @@ case class SaveDataExtendsCommand(
           vt.write.format(formatType).options(options).mode(mode).save(source)
         }
       case _ =>
-        throw new Exception("Unsupported datasource "+source)
+        throw new Exception(s"Unsupported datasource $source")
     }
     Seq.empty[Row]
   }
