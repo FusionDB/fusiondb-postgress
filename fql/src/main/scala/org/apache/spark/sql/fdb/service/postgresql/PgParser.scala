@@ -84,7 +84,12 @@ private[postgresql] class PgAstBuilder(conf: SQLConf) extends SparkSqlAstBuilder
     val props = ctx.tableProperty()
     var map: Map[String, String] = Map()
     for (i <- 0 to props.size()-1) {
-      map += (props.get(i).key.start.getText -> props.get(i).value.getStart.getText)
+      map += (
+        props.get(i).key.start
+          .getText.replace("'","").toLowerCase ->
+        props.get(i).value.getStart
+          .getText.replace("'","").toLowerCase
+        )
     }
     map
   }

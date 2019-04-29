@@ -41,7 +41,7 @@ case class LoadDataExtendsCommand(
   override def run(sparkSession: SparkSession): Seq[Row] = {
     source.split(":")(0) match {
       case "mysql" | "oracle" | "sqlserver" | "postgresql" =>
-        sparkSession.read.format(formatType).options(options).load().createTempView(tableName.table)
+        sparkSession.read.format("jdbc").options(options).load().createTempView(tableName.table)
       case "hdfs" | "s3" | "adls" | "file" =>
         sparkSession.read.format(formatType)
           .options(options)
@@ -66,9 +66,9 @@ case class SaveDataExtendsCommand(
     source.split(":")(0) match {
       case "mysql" | "oracle" | "sqlserver" | "postgresql" =>
         if (mode.isEmpty) {
-          vt.write.format(formatType).options(options).save()
+          vt.write.format("jdbc").options(options).save()
         } else {
-          vt.write.format(formatType).options(options).mode(mode).save()
+          vt.write.format("jdbc").options(options).mode(mode).save()
         }
       case "hdfs" | "s3" | "adls" | "file" =>
         if (mode.isEmpty) {

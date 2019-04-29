@@ -32,10 +32,9 @@ import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 import org.apache.spark.sql.execution.command._
 import org.apache.spark.sql.execution.datasources.CreateTable
 import org.apache.spark.sql.expressions.UserDefinedFunction
-import org.apache.spark.sql.functions._
-import org.apache.spark.sql.fdb.SQLServerConf._
 import org.apache.spark.sql.fdb.SQLServerEnv
 import org.apache.spark.sql.fdb.service.CompositeService
+import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
 import org.apache.spark.util.Utils._
 
@@ -274,6 +273,7 @@ private[fdb] object PgMetadata extends Logging {
     PgSystemFunction(         1081, FunctionIdentifier(               "format_type", Some(catalogDbName)), _ => udf { (type_oid: Int, typemod: String) => pgTypeOidMap.get(type_oid).map(_.name).getOrElse("unknown") }),
     PgSystemFunction(         1215, FunctionIdentifier(           "obj_description", Some(catalogDbName)), _ => udf { (oid: Int, tableName: String) => "" }),
     PgSystemFunction(         1402, FunctionIdentifier(           "current_schemas",                None), _ => udf { (arg: Boolean) => Seq(defaultSparkNamespace._2) }),
+    PgSystemFunction(         1403, FunctionIdentifier(           "current_schema",                 None), _ => udf { () => Some(catalogDbName) }),
     PgSystemFunction(         1597, FunctionIdentifier(       "pg_encoding_to_char", Some(catalogDbName)), _ => udf { (encoding: Int) => "" }),
     PgSystemFunction(         1642, FunctionIdentifier(           "pg_get_userbyid", Some(catalogDbName)), _ => udf { (userid: Int) => "" }),
     PgSystemFunction(         1716, FunctionIdentifier(               "pg_get_expr", Some(catalogDbName)), _ => udf { (adbin: String, adrelid: Int) => "" }),
