@@ -19,6 +19,9 @@
 
 #
 # Shell script for starting the Spark SQL server
+# export JAVA_HOME=/usr/jdk64/jdk1.8.0_112
+# export SPARK_HOME=/usr/jdp/current/spark2-client
+# export LIVY_HOME=/usr/jdp/current/livy2-server
 
 # If multi-context mode enabled, this is the memory size for the server itself
 SPARK_SQL_SERVER_MEM_IN_MULTI_CONTEXT_MODE="1g"
@@ -194,7 +197,7 @@ find_resource
 echo "Using \`spark-submit\` from path: $SPARK_DIR" 1>&2
 CLASS="org.apache.spark.sql.fdb.SQLServer"
 PROPERTY_FILE=${_DIR}/../conf/spark-defaults.conf
-APP_NAME="Spark SQL Server"
+APP_NAME="FusionDB SQL Server"
 exec "${SPARK_DIR}"/sbin/spark-daemon.sh submit $CLASS 1 --name "${APP_NAME}" --properties-file ${PROPERTY_FILE} \
   $(join_by " " ${SPARK_SQL_SERVER_CONF[@]}) \
   ${RESOURCES}

@@ -41,14 +41,17 @@ case class LoadDataExtendsCommand(
   override def run(sparkSession: SparkSession): Seq[Row] = {
     source.split(":")(0) match {
       case "mysql" | "oracle" | "sqlserver" | "postgresql" =>
-        sparkSession.read.format("jdbc").options(options).load().createTempView(tableName.table)
+        sparkSession.read.format("jdbc")
+          .options(options)
+          .load()
+          .createOrReplaceTempView(tableName.table)
       case "hdfs" | "s3" | "adls" | "file" =>
         sparkSession.read.format(formatType)
           .options(options)
           .load(source)
-          .createTempView(tableName.table)
+          .createOrReplaceTempView(tableName.table)
       case _ =>
-        throw new Exception("Unsupported datasource $source")
+        throw new Exception(s"Unsupported datasource $source")
     }
     Seq.empty[Row]
   }
