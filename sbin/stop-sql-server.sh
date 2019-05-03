@@ -18,6 +18,8 @@
 #
 
 # Stops the SQL server on the machine this script is executed on.
+# export JAVA_HOME=/usr/jdk64/jdk1.8.0_112
+# export SPARK_HOME=/usr/jdp/current/spark2-client
 
 # Determine the current working directory
 _DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"

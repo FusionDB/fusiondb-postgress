@@ -1,2 +1,2 @@
 # Fusiondb
-Fusiondb is a simple and powerful database engine.
+Fusiondb is a simple and powerful federated database engine.
