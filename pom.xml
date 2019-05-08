@@ -17,6 +17,8 @@
         <module>core</module>
         <module>runtime/spark</module>
         <module>runtime/flink</module>
+        <module>examples/extensions</module>
+        <module>examples/tpcds</module>
     </modules>
 
     <properties>
