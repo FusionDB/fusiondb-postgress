@@ -24,11 +24,11 @@ import scala.util.control.NonFatal
 import org.apache.spark.annotation.DeveloperApi
 import org.apache.spark.deploy.master.{LeaderElectable, MonarchyLeaderAgent, ZooKeeperLeaderElectionAgentAccessor}
 import org.apache.spark.internal.Logging
-import org.apache.spark.sql.SQLContext
-import org.apache.spark.sql.internal.SQLConf
-import org.apache.spark.sql.fdb.SQLServerConf._
 import org.apache.spark.sql.fdb.service.{CompositeService, SparkSQLServiceManager}
 import org.apache.spark.sql.fdb.util.{ShutdownHookManager, SQLServerUtils}
+import org.apache.spark.sql.SQLContext
+import org.apache.spark.sql.fdb.SQLServerConf._
+import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.util.Utils._
 
 /**

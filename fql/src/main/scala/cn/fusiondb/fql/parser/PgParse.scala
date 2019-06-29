@@ -41,7 +41,7 @@ private[fql] class PgAstBuilder(conf: SQLConf) extends SparkSqlAstBuilder(conf)
   override def visitLoadDataExtends(ctx: LoadDataExtendsContext): LogicalPlan = withOrigin(ctx) {
     val options = Option(ctx.options).map(visitPropertyKeyValues).getOrElse(Map.empty)
     LoadDataExtendsCommand(
-      source = ctx.source.getText.replace("'","").toLowerCase,
+      source = ctx.source.getText.replace("'", ""),
       formatType = Option(ctx.`type`).map(st => st.getText.toLowerCase).getOrElse(""),
       tableName = visitTableIdentifier(ctx.tableIdentifier()),
       options)
@@ -51,7 +51,7 @@ private[fql] class PgAstBuilder(conf: SQLConf) extends SparkSqlAstBuilder(conf)
     val options = Option(ctx.options).map(visitPropertyKeyValues).getOrElse(Map.empty)
     val partitionByColumn = ctx.identifier()
     SaveDataExtendsCommand(
-      source = ctx.source.getText.replace("'","").toLowerCase,
+      source = ctx.source.getText.replace("'", ""),
       mode = Option(ctx.saveMode).map(st => st.getText.toLowerCase).getOrElse(""),
       formatType = Option(ctx.`type`).map(st => st.getText.toLowerCase).getOrElse(""),
       viewTable = visitTableIdentifier(ctx.tableName),
@@ -65,8 +65,13 @@ private[fql] class PgAstBuilder(conf: SQLConf) extends SparkSqlAstBuilder(conf)
     val props = ctx.tableProperty()
     var map: Map[String, String] = Map()
     for (i <- 0 to props.size()-1) {
-      map += (props.get(i).key.start.getText.replace("'","").toLowerCase
-        -> props.get(i).value.getStart.getText.replace("'","").toLowerCase)
+      map += (
+        props.get(i).key.start
+          .getText.replace("'", "").toLowerCase
+        ->
+        props.get(i).value.getStart
+          .getText.replace("'", "").toLowerCase
+        )
     }
     map
   }

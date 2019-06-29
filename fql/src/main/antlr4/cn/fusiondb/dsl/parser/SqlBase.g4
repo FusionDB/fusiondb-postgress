@@ -167,12 +167,14 @@ statement
     | CLEAR CACHE                                                      #clearCache
     | LOAD DATA LOCAL? INPATH path=STRING OVERWRITE? INTO TABLE
         tableIdentifier partitionSpec?                                 #loadData
-    | LOAD source=STRING (FORMAT type=identifier)?
-        (OPTIONS options=tablePropertyList)? AS tableIdentifier        #loadDataExtends
-    | SAVE saveMode=identifier? tableName=tableIdentifier TO source=STRING
+    | LOAD source=identifier
         (FORMAT type=identifier)?
-        (OPTIONS options=tablePropertyList)?
-        (PARTITION BY identifier)?                                     #saveData
+        (OPTIONS options=tablePropertyList)? AS tableIdentifier        #loadDataExtends
+    | SAVE saveMode=identifier? tableName=tableIdentifier TO
+        source=identifier
+        (FORMAT type=identifier)?
+        (PARTITION BY identifier)?
+        (OPTIONS options=tablePropertyList)?                           #saveData
     | TRUNCATE TABLE tableIdentifier partitionSpec?                    #truncateTable
     | MSCK REPAIR TABLE tableIdentifier                                #repairTable
     | op=(ADD | LIST) identifier .*?                                   #manageResource

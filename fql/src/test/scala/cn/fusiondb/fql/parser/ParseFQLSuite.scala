@@ -53,12 +53,29 @@ class ParseFqlSuite extends SparkFunSuite {
     val rdd = qe.executedPlan.execute()
 
     val p2 = pql.parsePlan(pgSql)
-    val qe2 = spark.sessionState.executePlan(p2)
-    qe2.assertAnalyzed()
+    // val qe2 = spark.sessionState.executePlan(p2)
+    // qe2.assertAnalyzed()
     // println(qe2.optimizedPlan.numberedTreeString)
 
-    val rdd2 = qe2.executedPlan.execute()
+    // val rdd2 = qe2.executedPlan.execute()
     // println(rdd2.collect().foreach(println))
+  }
+
+  test("load kafka data") {
+    assertValidSQLStringForPg(
+      "load kafka " +
+        "options('KAFKA.bootstrap.servers'='172.27.129.191:9092', 'subscribe'='topic_xu', " +
+        "'startingOffsets'='earliest') as T1",
+      "SAVE T1 TO 'hdfs://172.27.129.210:8020/tmp/t2' FORMAT delta"
+    )
+  }
+
+  test("testing write delta") {
+    assertValidSQLStringForPg(
+      "load 'file:///data/github/fusiondb/data/csv' format csv " +
+        "options(inferSchema=true, header=true) as t1",
+      "SAVE T1 TO 'hdfs://172.27.129.210:8020/tmp/t2' FORMAT delta"
+    )
   }
 
   test("pql parse") {

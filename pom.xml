@@ -27,11 +27,11 @@
         <java.version>1.8</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <maven.version>3.5.4</maven.version>
+        <maven.version>3.5.6</maven.version>
         <scala.version>2.11.12</scala.version>
         <scala.binary.version>2.11</scala.binary.version>
         <kryo.version>2.22</kryo.version>
-        <spark.version>2.4.0</spark.version>
+        <spark.version>2.4.3</spark.version>
         <livy.version>0.5.0-incubating</livy.version>
         <mockito.version>1.9.5</mockito.version>
         <zookeeper.version>3.4.6</zookeeper.version>
@@ -49,6 +49,7 @@
         <postgresql.version>42.2.2</postgresql.version>
         <log4j.version>1.2.17</log4j.version>
         <mysql.version>5.1.38</mysql.version>
+        <delta.version>0.1.0</delta.version>
 
         <test.java.home>${java.home}</test.java.home>
         <execution.root>${user.dir}</execution.root>
@@ -102,6 +103,18 @@
     </dependencies>
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>io.delta</groupId>
+                <artifactId>delta-core_${scala.binary.version}</artifactId>
+                <version>${delta.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.spark</groupId>
+                <artifactId>spark-sql-kafka-0-10_${scala.binary.version}</artifactId>
+                <version>${spark.version}</version>
+                <scope>provided</scope>
+            </dependency>
             <dependency>
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>

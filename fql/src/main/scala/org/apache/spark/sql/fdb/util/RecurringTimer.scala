@@ -20,8 +20,9 @@ package org.apache.spark.sql.fdb.util
 import org.apache.spark.internal.Logging
 import org.apache.spark.util.Clock
 
-private[fdb] class RecurringTimer(clock: Clock, period: Long, callback: (Long) => Unit, name: String)
-  extends Logging {
+private[fdb] class
+  RecurringTimer(clock: Clock, period: Long, callback: (Long) => Unit, name: String)
+    extends Logging {
 
   private val thread = new Thread("RecurringTimer - " + name) {
     setDaemon(true)
