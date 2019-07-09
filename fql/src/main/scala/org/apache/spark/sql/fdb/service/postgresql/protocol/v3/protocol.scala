@@ -601,8 +601,56 @@ object PgWireProtocol extends Logging {
             ctx.write(EmptyQueryResponse)
           } else if (statements.size > 1) {
             // TODO: Support multiple queries
-            throw new UnsupportedOperationException(
-              s"multi-query execution unsupported: ${statements.mkString(", ")}")
+            for (statement <- statements) {
+              val query = statement
+
+              // Checks if `PostgreSqlParser` can parse the input query and executes the query
+              // in `PostgreSQLExecutor`.
+              val plan = (query, PgUtils.parse(query))
+              val execState = cli.executeStatement(sessionState._sessionId, plan)
+              sessionState.activeExecState = Some(execState)
+
+              val schema = execState.outputSchema()
+              val formats = resultDataFormatsFor(schema, sessionState)
+              val rowWriter = PgRowConverters(conf, schema, formats)
+
+              // Runs it...
+              val resultRowIter = execState.run()
+
+              // Sends back a complete message depending on the plan
+              plan._2 match {
+                case BeginCommand(_) =>
+                  ctx.write(CommandComplete("BEGIN"))
+
+                case SetCommand(_) =>
+                  if (SQLServerUtils.isTesting) {
+                    // In the PostgreSQL expected behaviour, `SET` returns no rows.
+                    // But, it is useful
+                    // to get current values for parameters. So, if testing mode enabled,
+                    // returns a current value for a given parameter.
+                    ctx.write(RowDescription(schema, sessionState))
+                    resultRowIter.foreach { row => ctx.write(DataRow(row, rowWriter))}
+                  }
+                  ctx.write(CommandComplete("SET"))
+
+                case _ =>
+                  // The response to a SELECT query (or other queries that return row sets, such as
+                  // EXPLAIN or SHOW) normally consists of RowDescription, zero or more DataRow
+                  // messages, and then CommandComplete.
+                  ctx.write(RowDescription(schema, sessionState))
+
+                  var numRows = 0
+                  resultRowIter.foreach { iter =>
+                    ctx.write(DataRow(iter, rowWriter))
+                    numRows += 1
+                  }
+                  ctx.write(CommandComplete(s"SELECT $numRows"))
+              }
+
+              sessionState.activeExecState = None
+            }
+            // throw new UnsupportedOperationException(
+            // s"multi-query execution unsupported: ${statements.mkString(", ")}")
           } else {
             val query = statements.head
 
