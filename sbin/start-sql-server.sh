@@ -86,7 +86,7 @@ function find_resource {
   if [ -e $built_jar ]; then
     RESOURCES=$built_jar
   else
-    RESOURCES="$_DIR/../assembly/${jar_file}"
+    RESOURCES="$_DIR/../assembly/fusiondb-fql_${scala_version}_${spark_version}_${sql_server_version}-with-dependencies.jar"
     echo "${built_jar} not found, so use pre-compiled ${RESOURCES}"
   fi
 }

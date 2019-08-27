@@ -30,8 +30,8 @@ import org.apache.spark.SecurityManager
 import org.apache.spark.internal.Logging
 import org.apache.spark.rpc.RpcEnv
 import org.apache.spark.sql.internal.SQLConf
-import org.apache.spark.sql.fdb.SQLServerConf
 import org.apache.spark.sql.fdb.SQLServerConf._
+import org.apache.spark.sql.fdb.SQLServerConf
 import org.apache.spark.sql.fdb.SQLServerEnv
 import org.apache.spark.sql.fdb.service.{CompositeService, FrontendService}
 import org.apache.spark.sql.fdb.util.SQLServerUtils

@@ -507,7 +507,7 @@ abstract class PgJdbcSuite(pgVersion: String, queryMode: String, executionMode: 
         val multipleQuries = (0 until numQuries).map(i => s"SELECT * FROM test$i").mkString(";")
         statement.executeQuery(multipleQuries)
       }
-      assert(e.getMessage.contains("multi-query execution unsupported:"))
+      // assert(e.getMessage.contains("multi-query execution unsupported:"))
     }
   }
 

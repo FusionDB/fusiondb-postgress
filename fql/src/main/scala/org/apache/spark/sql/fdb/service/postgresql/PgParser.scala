@@ -21,19 +21,21 @@ import java.util.Locale
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable.Buffer
-import org.apache.spark.sql.catalyst.FunctionIdentifier
-import org.apache.spark.sql.catalyst.analysis._
 import org.apache.spark.sql.catalyst.expressions._
+import org.apache.spark.sql.catalyst.analysis._
 import org.apache.spark.sql.catalyst.expressions.aggregate.{AggregateFunction, First}
 import org.apache.spark.sql.catalyst.parser.ParseException
 import org.apache.spark.sql.catalyst.plans.logical._
+import org.apache.spark.sql.catalyst.FunctionIdentifier
 import org.apache.spark.sql.internal.SQLConf
-import org.apache.spark.sql.fdb.SQLServerConf._
-import org.apache.spark.sql.fdb.catalyst.expressions.ParameterPlaceHolder
 import org.apache.spark.sql.fdb.execution.{SparkSqlAstBuilder, SparkSqlParser}
-import cn.fusiondb.dsl.parser.SqlBaseParser._
-import org.apache.spark.sql.fdb.service.postgresql.execution.command.{BeginCommand, LoadDataExtendsCommand, SaveDataExtendsCommand}
+import org.apache.spark.sql.fdb.catalyst.expressions.ParameterPlaceHolder
+import org.apache.spark.sql.fdb.SQLServerConf._
+import org.apache.spark.sql.fdb.service.postgresql.execution.command.BeginCommand
 import org.apache.spark.sql.types._
+
+import cn.fusiondb.dsl.parser.SqlBaseParser._
+import cn.fusiondb.fql.parser.{LoadDataExtendsCommand, SaveDataExtendsCommand}
 
 /**
  * Concrete parser for PostgreSQL statements.
@@ -59,7 +61,7 @@ private[postgresql] class PgAstBuilder(conf: SQLConf) extends SparkSqlAstBuilder
   override def visitLoadDataExtends(ctx: LoadDataExtendsContext): LogicalPlan = withOrigin(ctx) {
     val options = Option(ctx.options).map(visitPropertyKeyValues).getOrElse(Map.empty)
     LoadDataExtendsCommand(
-      source = ctx.source.getText.replace("'","").toLowerCase,
+      source = ctx.source.getText.replace("'", "").toLowerCase,
       formatType = Option(ctx.`type`).map(st => st.getText.toLowerCase).getOrElse(""),
       tableName = visitTableIdentifier(ctx.tableIdentifier()),
       options)
@@ -68,7 +70,7 @@ private[postgresql] class PgAstBuilder(conf: SQLConf) extends SparkSqlAstBuilder
   override def visitSaveData(ctx: SaveDataContext) : LogicalPlan = withOrigin(ctx) {
     val options = Option(ctx.options).map(visitPropertyKeyValues).getOrElse(Map.empty)
     val partitionByColumn = ctx.identifier()
-    val source = ctx.source.getText.replace("'","").toLowerCase
+    val source = ctx.source.getText.replace("'", "").toLowerCase
     SaveDataExtendsCommand(
       source,
       mode = Option(ctx.saveMode).map(st => st.getText.toLowerCase).getOrElse(""),
@@ -86,9 +88,9 @@ private[postgresql] class PgAstBuilder(conf: SQLConf) extends SparkSqlAstBuilder
     for (i <- 0 to props.size()-1) {
       map += (
         props.get(i).key.start
-          .getText.replace("'","").toLowerCase ->
+          .getText.replace("'", "") ->
         props.get(i).value.getStart
-          .getText.replace("'","").toLowerCase
+          .getText.replace("'", "")
         )
     }
     map

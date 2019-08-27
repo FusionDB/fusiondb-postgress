@@ -17,10 +17,11 @@ package cn.fusiondb.fql.parser
 
 import cn.fusiondb.dsl.parser.SqlBaseParser
 import cn.fusiondb.dsl.parser.SqlBaseParser.{LoadDataExtendsContext, SaveDataContext, TablePropertyListContext}
-import org.apache.spark.sql.SparkSession
+
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 import org.apache.spark.sql.fdb.parser.{AbstractSqlParser, AstBuilder}
 import org.apache.spark.sql.internal.{SQLConf, VariableSubstitution}
+import org.apache.spark.sql.SparkSession
 
 class FqlParse(conf: SQLConf, sparkSession: SparkSession) extends AbstractSqlParser {
   val astBuilder = new FqlAstBuilder(conf, sparkSession)
@@ -33,16 +34,15 @@ class FqlParse(conf: SQLConf, sparkSession: SparkSession) extends AbstractSqlPar
   }
 }
 
-/**
-  * Builder that converts an ANTLR ParseTree into a LogicalPlan/Expression/TableIdentifier.
-  */
+
+// Builder that converts an ANTLR ParseTree into a LogicalPlan/Expression/TableIdentifier.
 class FqlAstBuilder(conf: SQLConf, sparkSession: SparkSession) extends AstBuilder(conf) {
   import org.apache.spark.sql.catalyst.parser.ParserUtils._
 
   override def visitLoadDataExtends(ctx: LoadDataExtendsContext): LogicalPlan = withOrigin(ctx) {
     val options = Option(ctx.options).map(visitPropertyKeyValues).getOrElse(Map.empty)
     LoadDataExtendsCommand(
-      source = ctx.source.getText.replace("'","").toLowerCase,
+      source = ctx.source.getText.replace("'", "").toLowerCase,
       formatType = Option(ctx.`type`).map(st => st.getText.toLowerCase).getOrElse(""),
       tableName = visitTableIdentifier(ctx.tableIdentifier()),
       options)
@@ -52,7 +52,7 @@ class FqlAstBuilder(conf: SQLConf, sparkSession: SparkSession) extends AstBuilde
     val options = Option(ctx.options).map(visitPropertyKeyValues).getOrElse(Map.empty)
     val partitionByColumn = ctx.identifier()
     SaveDataExtendsCommand(
-      source = ctx.source.getText.replace("'","").toLowerCase,
+      source = ctx.source.getText.replace("'", "").toLowerCase,
       mode = Option(ctx.saveMode).map(st => st.getText.toLowerCase).getOrElse(""),
       formatType = Option(ctx.`type`).map(st => st.getText.toLowerCase).getOrElse(""),
       viewTable = visitTableIdentifier(ctx.tableName),
@@ -66,8 +66,8 @@ class FqlAstBuilder(conf: SQLConf, sparkSession: SparkSession) extends AstBuilde
     val props = ctx.tableProperty()
     var map: Map[String, String] = Map()
     for (i <- 0 to props.size()-1) {
-      map += (props.get(i).key.start.getText.replace("'","").toLowerCase
-        -> props.get(i).value.getStart.getText.replace("'","").toLowerCase)
+      map += (props.get(i).key.start.getText.replace("'", "").toLowerCase
+        -> props.get(i).value.getStart.getText.replace("'", "").toLowerCase)
     }
     map
   }

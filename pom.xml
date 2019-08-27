@@ -17,6 +17,8 @@
         <module>core</module>
         <module>runtime/spark</module>
         <module>runtime/flink</module>
+        <module>examples/extensions</module>
+        <module>examples/tpcds</module>
     </modules>
 
     <properties>
@@ -25,11 +27,11 @@
         <java.version>1.8</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <maven.version>3.5.4</maven.version>
+        <maven.version>3.5.6</maven.version>
         <scala.version>2.11.12</scala.version>
         <scala.binary.version>2.11</scala.binary.version>
         <kryo.version>2.22</kryo.version>
-        <spark.version>2.4.0</spark.version>
+        <spark.version>2.4.3</spark.version>
         <livy.version>0.5.0-incubating</livy.version>
         <mockito.version>1.9.5</mockito.version>
         <zookeeper.version>3.4.6</zookeeper.version>
@@ -47,6 +49,11 @@
         <postgresql.version>42.2.2</postgresql.version>
         <log4j.version>1.2.17</log4j.version>
         <mysql.version>5.1.38</mysql.version>
+        <delta.version>0.3.0</delta.version>
+        <clickhouse.version>0.1.54</clickhouse.version>
+        <mssql.version>7.2.2.jre8</mssql.version>
+        <teradata.version>15.10.00.37</teradata.version> <!-- custom exec: mvn install:install-file -->
+        <oracle.version>12.1.0.2</oracle.version> <!-- custom exec: mvn install:install-file -->
 
         <test.java.home>${java.home}</test.java.home>
         <execution.root>${user.dir}</execution.root>
@@ -100,6 +107,59 @@
     </dependencies>
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>cn.fusiondb</groupId>
+                <artifactId>fusiondb-spark_${scala.binary.version}</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.oracle.jdbc</groupId>
+                <artifactId>ojdbc7</artifactId>
+                <version>${oracle.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.ibm.db2.jcc</groupId>
+                <artifactId>db2jcc</artifactId>
+                <version>db2jcc4</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.teradata.jdbc</groupId>
+                <artifactId>tdgssconfig</artifactId>
+                <version>${teradata.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.teradata.jdbc</groupId>
+                <artifactId>terajdbc4</artifactId>
+                <version>${teradata.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.microsoft.sqlserver</groupId>
+                <artifactId>mssql-jdbc</artifactId>
+                <version>${mssql.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>ru.yandex.clickhouse</groupId>
+                <artifactId>clickhouse-jdbc</artifactId>
+                <version>${clickhouse.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.delta</groupId>
+                <artifactId>delta-core_${scala.binary.version}</artifactId>
+                <version>${delta.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.spark</groupId>
+                <artifactId>spark-sql-kafka-0-10_${scala.binary.version}</artifactId>
+                <version>${spark.version}</version>
+                <scope>provided</scope>
+            </dependency>
             <dependency>
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>
