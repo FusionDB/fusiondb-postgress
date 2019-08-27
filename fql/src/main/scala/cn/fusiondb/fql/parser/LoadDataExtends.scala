@@ -30,7 +30,7 @@ case class LoadDataExtendsCommand(
           options: Map[String, String]) extends RunnableCommand {
   override def run(sparkSession: SparkSession): Seq[Row] = {
     source.split(":")(0) match {
-      case "mysql" | "oracle" | "sqlserver" | "postgresql" =>
+      case "mysql" | "oracle" | "postgresql" | "db2" | "teradata" | "sqlserver" =>
         sparkSession.read.format("jdbc")
           .options(options)
           .load()
@@ -46,7 +46,7 @@ case class LoadDataExtendsCommand(
         val table = tableName.table
 
         val struct = new StructType()
-          .add("name1", DataTypes.StringType)
+          .add("user", DataTypes.StringType)
           .add("age", DataTypes.StringType)
           .add("ts", DataTypes.StringType)
           .add("record_time", DataTypes.StringType)
@@ -55,16 +55,18 @@ case class LoadDataExtendsCommand(
         val st = sparkSession.readStream.format("kafka")
           .options(options)
           .load()
+          .withWatermark("timestamp", "1 minutes")
           .selectExpr("CAST(value AS STRING)")
           .select(from_json($"value", struct).as(table))
           .selectExpr(s"$table.*")
           .createOrReplaceTempView(table)
 
-        val ds = sparkSession.sql(s"select * from test")
+        val ds = sparkSession.sql(s"select count(*) from $table")
             ds.writeStream
+              .outputMode("complete")
               .format("console")
               .start()
-//              .awaitTermination()
+              .awaitTermination()
       case _ =>
         throw new Exception(s"Unsupported datasource $source")
     }
@@ -82,7 +84,7 @@ case class SaveDataExtendsCommand(
     val tableViewName = viewTable.table
     val vt = sparkSession.sql(s"select * from $tableViewName")
     source.split(":")(0) match {
-      case "mysql" | "oracle" | "sqlserver" | "postgresql" =>
+      case "mysql" | "oracle" | "postgresql" | "db2" | "teradata" | "sqlserver" =>
         if (mode.isEmpty) {
           vt.write.format("jdbc")
             .options(options)

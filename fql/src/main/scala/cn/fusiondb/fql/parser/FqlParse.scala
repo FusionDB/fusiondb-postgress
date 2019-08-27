@@ -17,10 +17,11 @@ package cn.fusiondb.fql.parser
 
 import cn.fusiondb.dsl.parser.SqlBaseParser
 import cn.fusiondb.dsl.parser.SqlBaseParser.{LoadDataExtendsContext, SaveDataContext, TablePropertyListContext}
-import org.apache.spark.sql.SparkSession
+
 import org.apache.spark.sql.catalyst.plans.logical.LogicalPlan
 import org.apache.spark.sql.fdb.parser.{AbstractSqlParser, AstBuilder}
 import org.apache.spark.sql.internal.{SQLConf, VariableSubstitution}
+import org.apache.spark.sql.SparkSession
 
 class FqlParse(conf: SQLConf, sparkSession: SparkSession) extends AbstractSqlParser {
   val astBuilder = new FqlAstBuilder(conf, sparkSession)
@@ -33,9 +34,8 @@ class FqlParse(conf: SQLConf, sparkSession: SparkSession) extends AbstractSqlPar
   }
 }
 
-/**
-  * Builder that converts an ANTLR ParseTree into a LogicalPlan/Expression/TableIdentifier.
-  */
+
+// Builder that converts an ANTLR ParseTree into a LogicalPlan/Expression/TableIdentifier.
 class FqlAstBuilder(conf: SQLConf, sparkSession: SparkSession) extends AstBuilder(conf) {
   import org.apache.spark.sql.catalyst.parser.ParserUtils._
 
