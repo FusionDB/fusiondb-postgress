@@ -12,8 +12,9 @@
     <url>http://www.fusiondb.cn/</url>
 
     <modules>
-        <module>common</module>
-        <module>fql</module>
+        <module>common/kvstore</module>
+        <module>common/delta</module>
+        <module>sql</module>
         <module>core</module>
         <module>runtime/spark</module>
         <module>runtime/flink</module>
@@ -54,6 +55,7 @@
         <mssql.version>7.2.2.jre8</mssql.version>
         <teradata.version>15.10.00.37</teradata.version> <!-- custom exec: mvn install:install-file -->
         <oracle.version>12.1.0.2</oracle.version> <!-- custom exec: mvn install:install-file -->
+        <foundationdb.version>6.1.8</foundationdb.version>
 
         <test.java.home>${java.home}</test.java.home>
         <execution.root>${user.dir}</execution.root>
@@ -111,6 +113,11 @@
                 <groupId>cn.fusiondb</groupId>
                 <artifactId>fusiondb-spark_${scala.binary.version}</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.foundationdb</groupId>
+                <artifactId>fdb-java</artifactId>
+                <version>${foundationdb.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.oracle.jdbc</groupId>
@@ -348,7 +355,7 @@
                         <configuration>
                             <rules>
                                 <requireMavenVersion>
-                                    <version>(3.3.2,${maven.version})</version>
+                                    <version>(3.0.2, ${maven.version})</version>
                                 </requireMavenVersion>
                                 <requireJavaVersion>
                                     <version>${java.version}</version>

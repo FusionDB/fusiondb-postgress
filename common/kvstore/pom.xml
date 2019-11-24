@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>fusiondb_2.11</artifactId>
+        <groupId>cn.fusiondb</groupId>
+        <version>0.1.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>fusiondb-kvstore_2.11</artifactId>
+    <packaging>pom</packaging>
+    <name>Fusiondb Project KV Store</name>
+    <url>http://fusiondb.cn/</url>
+
+    <properties>
+        <sbt.project.name>kvstore</sbt.project.name>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.foundationdb</groupId>
+            <artifactId>fdb-java</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+    </build>
+</project>
