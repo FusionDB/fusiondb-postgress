@@ -34,7 +34,7 @@
         <spark.version>2.4.3</spark.version>
         <livy.version>0.5.0-incubating</livy.version>
         <mockito.version>1.9.5</mockito.version>
-        <zookeeper.version>3.4.6</zookeeper.version>
+        <zookeeper.version>3.4.14</zookeeper.version>
         <hadoop.version>2.7.3</hadoop.version>
         <curator.version>2.6.0</curator.version>
         <hadoop.binary.version>2.7</hadoop.binary.version>
